@@ -2,21 +2,27 @@
 
 import { Link } from '@chakra-ui/next-js';
 import { useEffect, useState } from 'react';
-import { useAccount } from 'wagmi';
 import { useAppContext } from '@/context/state';
 import RejuvenateAi from '../../images/svg/rejuvenate-logo.svg';
 import RegisterForm from '../register-form';
-import { ConnectKitButton } from 'connectkit';
+import { useWallet, useAllWallets } from 'useink';
+import dynamic from 'next/dynamic';
+
+const ConnectWallet = dynamic(() => import('../connectWallet'), {
+  ssr: false,
+});
 
 const Header = ({ bg = 'transparent' }: { bg?: string }) => {
   const { setAddress } = useAppContext();
+  const { account, connect, disconnect } = useWallet();
+  const wallets = useAllWallets();
   //const { address } = useAccount()
   const address = 'yes';
   //const auth = useAuth();
 
   useEffect(() => {
-    setAddress(`${address}`);
-  }, [address, setAddress]);
+    console.log(account, wallets);
+  }, [account]);
 
   return (
     <section
@@ -28,7 +34,7 @@ const Header = ({ bg = 'transparent' }: { bg?: string }) => {
         </Link>
       </div>
       <>
-        {address ? (
+        {account ? (
           <>
             <label
               className='btn bg-[#014421] h-[48px] px-5 lg:h-[50px] font-bold text-base lg:text-[20px] text-[#F5F5DC] rounded-xl'
@@ -38,18 +44,21 @@ const Header = ({ bg = 'transparent' }: { bg?: string }) => {
               Register
             </label>
             <input className='modal-state' id='modal-1' type='checkbox' />
+            <RegisterForm />
           </>
         ) : (
-          <button
-            type='submit'
-            className='btn w-full max-w-[200px] flex items-center justify-center bg-[#014421] h-[48px] px-5 lg:h-[50px] font-bold text-base lg:text-[20px] text-[#F5F5DC] rounded-xl'
-          >
-            Connect Wallet
-          </button>
-          //<ConnectKitButton />
+          <>
+            <label
+              htmlFor='modal-two'
+              className='btn w-full max-w-[200px] flex items-center justify-center bg-[#014421] h-[48px] px-5 lg:h-[50px] font-bold text-base lg:text-[20px] text-[#F5F5DC] rounded-xl'
+            >
+              Connect Wallet
+            </label>
+            <input className='modal-state' id='modal-two' type='checkbox' />
+            <ConnectWallet wallets={wallets} connect={connect} />
+          </>
         )}
       </>
-      <RegisterForm />
     </section>
   );
 };

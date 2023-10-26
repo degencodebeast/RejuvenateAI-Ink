@@ -224,6 +224,9 @@ importers:
       use-async-effect:
         specifier: ^2.2.7
         version: 2.2.7(react@18.2.0)
+      useink:
+        specifier: ^1.14.1
+        version: 1.14.1(react@18.2.0)(ws@8.14.2)
       viem:
         specifier: ^1.10.13
         version: 1.16.6(typescript@5.2.2)
@@ -13034,6 +13037,17 @@ packages:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0
     dependencies:
       react: 18.2.0
+    dev: false
+
+  /useink@1.14.1(react@18.2.0)(ws@8.14.2):
+    resolution: {integrity: sha512-ecCwowOaBUmeIiEmTHw84SD3mM07CafWqGyXIOGEkX/19klC/pCAdDDHP2IM1yPlCTbNVDiWd564SqAu33tDPQ==}
+    peerDependencies:
+      react: ^18.0.0
+      ws: ^8.13.0
+    dependencies:
+      nanoid: 3.3.6
+      react: 18.2.0
+      ws: 8.14.2(bufferutil@4.0.7)(utf-8-validate@5.0.10)
     dev: false
 
   /utf-8-validate@5.0.10:
