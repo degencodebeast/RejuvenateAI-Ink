@@ -1,27 +1,26 @@
 'use client';
 
 import { ChakraProvider } from '@chakra-ui/react';
-import { UseInkathonProvider } from '@scio-labs/use-inkathon';
 import React from 'react';
+import { UseInkProvider } from 'useink';
 //import { NearSocialBridgeProvider } from 'near-social-bridge';
 //import 'near-social-bridge/near-social-bridge.css';
-import { env } from '@/config/environment';
-import { getDeployments } from '@/deployments/deployments';
 
 import { AppWrapper } from '../context/state';
+import { RococoContractsTestnet, ShibuyaTestnet } from 'useink/chains';
 
 function Providers({ children }: { children: React.ReactNode }) {
   return (
-    <UseInkathonProvider
-      appName='RejuvenateAI'
-      connectOnInit={true}
-      defaultChain={env.defaultChain}
-      deployments={getDeployments()}
+    <UseInkProvider
+      config={{
+        dappName: 'RejuvenateAI',
+        chains: [RococoContractsTestnet, ShibuyaTestnet],
+      }}
     >
       <AppWrapper>
         <ChakraProvider>{children}</ChakraProvider>
       </AppWrapper>
-    </UseInkathonProvider>
+    </UseInkProvider>
   );
 }
 

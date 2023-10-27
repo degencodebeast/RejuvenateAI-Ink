@@ -1,5 +1,6 @@
 'use client';
 import React, { useEffect } from 'react';
+import { useWallet, useAllWallets } from 'useink';
 
 interface connectWalletProps {
   wallets: any;

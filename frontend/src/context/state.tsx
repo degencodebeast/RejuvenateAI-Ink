@@ -1,7 +1,8 @@
 'use client';
+import { env } from '@/config/environment';
+import { getDeployments } from '@/deployments/deployments';
+import { UseInkathonProvider } from '@scio-labs/use-inkathon';
 import { createContext, useContext, useState } from 'react';
-import { WagmiConfig, createConfig } from 'wagmi';
-import { ConnectKitProvider, getDefaultConfig } from 'connectkit';
 import { stateContextType } from '../types/state';
 
 const contextDefaultValue: stateContextType = {
