@@ -21,7 +21,7 @@ const Header = ({ bg = 'transparent' }: { bg?: string }) => {
   //const auth = useAuth();
 
   useEffect(() => {
-    console.log(account, wallets);
+    setAddress(account?.address || '');
   }, [account]);
 
   return (

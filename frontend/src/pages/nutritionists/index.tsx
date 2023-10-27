@@ -1,7 +1,7 @@
-'use client'
+'use client';
 
-import Icon from '@/components/Icon'
-import Header from '@/components/header'
+import Icon from '@/components/Icon';
+import Header from '@/components/header';
 import {
   useToast,
   Avatar,
@@ -20,20 +20,19 @@ import {
   TagLabel,
   Text,
   useDisclosure,
-} from '@chakra-ui/react'
-import { format } from 'date-fns'
-//import { useSyncContentHeight } from 'near-social-bridge';
-import { useEffect, useState } from 'react'
+} from '@chakra-ui/react';
+import { format } from 'date-fns';
+import { useEffect, useState } from 'react';
 
-import DatePicker from 'react-datepicker'
+import DatePicker from 'react-datepicker';
 type Nutritionist = {
-  firstName: string
-  location: string
-  lastName: string
-  bio: string
-  id: number
-  avatar: string
-}
+  firstName: string;
+  location: string;
+  lastName: string;
+  bio: string;
+  id: number;
+  avatar: string;
+};
 const data: Nutritionist[] = [
   {
     id: 1,
@@ -69,9 +68,9 @@ const data: Nutritionist[] = [
     avatar: '/images/f-user-26.jpg',
     location: 'United States',
   },
-]
+];
 
-const sectionTimes = [30, 45, 60, 90, 120]
+const sectionTimes = [30, 45, 60, 90, 120];
 export default function NutritionistPage() {
   // Update the VM iframe's hight container
   //useSyncContentHeight();
@@ -81,49 +80,50 @@ export default function NutritionistPage() {
     position: 'top',
     status: 'success',
     title: 'Your appointment was booked successfully',
-  })
-  const { isOpen, onOpen, onClose } = useDisclosure()
-  const [selectedNutritionist, setSelectedNutritionist] = useState<Nutritionist | null>(null)
-  const [bookingDate, setBookingDate] = useState(new Date())
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [showBookingDetails, setShowBookingDetails] = useState(false)
-  const [sectionDuration, setSectionDuration] = useState(30)
+  });
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [selectedNutritionist, setSelectedNutritionist] =
+    useState<Nutritionist | null>(null);
+  const [bookingDate, setBookingDate] = useState(new Date());
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showBookingDetails, setShowBookingDetails] = useState(false);
+  const [sectionDuration, setSectionDuration] = useState(30);
 
-  const minsToMillisec = (mins: number) => +mins * 1000 * 60
+  const minsToMillisec = (mins: number) => +mins * 1000 * 60;
 
   const handleClick = (nutritionist: Nutritionist) => {
-    onOpen()
-    setSelectedNutritionist(nutritionist)
-  }
+    onOpen();
+    setSelectedNutritionist(nutritionist);
+  };
   const handleDateSelect = (date: Date) => {
-    setBookingDate(date)
-    setShowBookingDetails(true)
-  }
+    setBookingDate(date);
+    setShowBookingDetails(true);
+  };
   const handleDateChange = (date: Date) => {
-    setBookingDate(date)
-  }
+    setBookingDate(date);
+  };
   const handleSectionDuration = (dur: number) => {
-    setSectionDuration(dur)
-    setShowBookingDetails(true)
-  }
+    setSectionDuration(dur);
+    setShowBookingDetails(true);
+  };
 
   function handleBookingSubmit() {
-    setIsSubmitting(true)
+    setIsSubmitting(true);
 
     setTimeout(() => {
-      setIsSubmitting(false)
-      toast()
-    }, 3000)
+      setIsSubmitting(false);
+      toast();
+    }, 3000);
   }
   return (
     <Box
-      className="bg-primaryYellowTrans"
+      className='bg-primaryYellowTrans'
       // h={'100vh'}
       px={6}
       overflowY={'auto'}
       pb={12}
     >
-      <Header bg="white" />
+      <Header bg='white' />
       <Box maxW={'1300'} mx={'auto'}>
         <Heading size={'lg'} my={4} bg={'white'} py={4} px={3} rounded={'md'}>
           Find Nutritionists from around the world
@@ -131,38 +131,56 @@ export default function NutritionistPage() {
         <Flex gap={6} wrap={'wrap'}>
           {data.map((p, i) => {
             return (
-              <Box key={'nutri' + i} bg={'white'} rounded={'md'} px={4} py={5} flex={1} minW={500}>
+              <Box
+                key={'nutri' + i}
+                bg={'white'}
+                rounded={'md'}
+                px={4}
+                py={5}
+                flex={1}
+                minW={500}
+              >
                 <Flex align={'start'} gap={4} mb={5}>
                   <Avatar size={'lg'} src={p.avatar} />
                   <Box>
-                    <Heading className="text-primaryGreen" as={'h3'} mb={2} size={'md'}>
+                    <Heading
+                      className='text-primaryGreen'
+                      as={'h3'}
+                      mb={2}
+                      size={'md'}
+                    >
                       {p.firstName} {p.lastName}
                     </Heading>
-                    <Text as={Flex} gap={1} className="text-secondaryGray">
-                      <Icon name="location_on" size={20} /> {p.location}
+                    <Text as={Flex} gap={1} className='text-secondaryGray'>
+                      <Icon name='location_on' size={20} /> {p.location}
                     </Text>
                   </Box>
                   <Button
                     onClick={() => handleClick(p)}
                     ml={'auto'}
-                    className="bg-primaryYellow text-primaryGreen"
+                    className='bg-primaryYellow text-primaryGreen'
                     gap={2}
                     rounded={'full'}
                     size={'md'}
                   >
-                    <Icon size={24} name="book" /> Book an Appointment
+                    <Icon size={24} name='book' /> Book an Appointment
                   </Button>
                 </Flex>
                 <Box>
-                  <Heading mb={3} as={'h4'} size={'md'} className="text-primaryGreen">
+                  <Heading
+                    mb={3}
+                    as={'h4'}
+                    size={'md'}
+                    className='text-primaryGreen'
+                  >
                     About {p.firstName}
                   </Heading>
-                  <Text pb={4} className="text-primaryGray">
+                  <Text pb={4} className='text-primaryGray'>
                     {p.bio}{' '}
                   </Text>
                 </Box>
               </Box>
-            )
+            );
           })}
         </Flex>
       </Box>
@@ -170,35 +188,43 @@ export default function NutritionistPage() {
       <Modal size={'3xl'} isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
         <ModalContent>
-          <ModalHeader className="text-primaryGreen">Booking appointment</ModalHeader>
+          <ModalHeader className='text-primaryGreen'>
+            Booking appointment
+          </ModalHeader>
           <ModalCloseButton />
           <ModalBody>
-            <Text className="text-secondaryGray" mb={5}>
+            <Text className='text-secondaryGray' mb={5}>
               You&apos;re booking{' '}
-              <span className="text-primaryGreen">
-                {selectedNutritionist?.firstName} {selectedNutritionist?.lastName}
+              <span className='text-primaryGreen'>
+                {selectedNutritionist?.firstName}{' '}
+                {selectedNutritionist?.lastName}
               </span>
             </Text>
             {showBookingDetails && (
               <Box>
-                <Text fontWeight={'semibold'} mb={2} className="text-primaryGreen">
+                <Text
+                  fontWeight={'semibold'}
+                  mb={2}
+                  className='text-primaryGreen'
+                >
                   {' '}
                   Appointment Details:
                 </Text>
                 <Text>
                   {' '}
-                  <span className="text-secondaryGray"> Date: </span>
+                  <span className='text-secondaryGray'> Date: </span>
                   {format(bookingDate, 'E, d MMM yyyy hh:mm aaa')}
                 </Text>
                 <Text>
                   {' '}
-                  <span className="text-secondaryGray">Duration:</span> {sectionDuration} Mins{' '}
+                  <span className='text-secondaryGray'>Duration:</span>{' '}
+                  {sectionDuration} Mins{' '}
                 </Text>
               </Box>
             )}
             <Flex wrap={'wrap'} gap={6}>
               <Box>
-                <Heading size={'md'} className="text-primaryGreen" my={4}>
+                <Heading size={'md'} className='text-primaryGreen' my={4}>
                   Choose appointment date
                 </Heading>
 
@@ -213,7 +239,7 @@ export default function NutritionistPage() {
                 />
               </Box>
               <Box>
-                <Heading size={'md'} className="text-primaryGreen" my={4}>
+                <Heading size={'md'} className='text-primaryGreen' my={4}>
                   Section Duration
                 </Heading>
 
@@ -229,7 +255,7 @@ export default function NutritionistPage() {
                       >
                         {dur} Mins
                       </Button>
-                    )
+                    );
                   })}
                 </Flex>
               </Box>
@@ -242,10 +268,10 @@ export default function NutritionistPage() {
             </Button>
             <Button
               onClick={handleBookingSubmit}
-              variant="solid"
+              variant='solid'
               isDisabled={isSubmitting}
               isLoading={isSubmitting}
-              className="disabled:opacity-60 bg-primaryYellow text-primaryGreen"
+              className='disabled:opacity-60 bg-primaryYellow text-primaryGreen'
             >
               Complete Booking
             </Button>
@@ -253,5 +279,5 @@ export default function NutritionistPage() {
         </ModalContent>
       </Modal>
     </Box>
-  )
+  );
 }

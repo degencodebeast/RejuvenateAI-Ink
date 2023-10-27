@@ -3,8 +3,6 @@
 import { ChakraProvider } from '@chakra-ui/react';
 import React from 'react';
 import { UseInkProvider } from 'useink';
-//import { NearSocialBridgeProvider } from 'near-social-bridge';
-//import 'near-social-bridge/near-social-bridge.css';
 
 import { AppWrapper } from '../context/state';
 import { RococoContractsTestnet, ShibuyaTestnet } from 'useink/chains';

@@ -6,7 +6,6 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as Yup from 'yup';
 import { uploadPromptToIpfs } from '@/helpers/prompt';
-//import { useAuth } from "near-social-bridge";
 
 const RegisterForm = () => {
   //const auth = useAuth()
