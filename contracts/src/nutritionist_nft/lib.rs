@@ -1,9 +1,9 @@
 #![cfg_attr(not(feature = "std"), no_std, no_main)]
 
-#[openbrush::implementation(PSP34, PSP34Burnable, PSP34Mintable, PSP34Metadata)]
+#[openbrush::implementation(Ownable, PSP34, PSP34Burnable, PSP34Mintable, PSP34Metadata)]
 #[openbrush::contract]
 pub mod nutritionist_nft {
-    use openbrush::traits::Storage;
+    use openbrush::{modifiers, traits::Storage};
 
     #[ink(storage)]
     #[derive(Default, Storage)]
@@ -12,7 +12,13 @@ pub mod nutritionist_nft {
         psp34: psp34::Data,
         #[storage_field]
         metadata: metadata::Data,
+        #[storage_field]
+        ownable: ownable::Data,
     }
+
+    #[default_impl(PSP34Burnable)]
+    #[modifiers(only_owner)]
+    fn burn(&mut self) {}
 
     impl NutritionistNFT {
         #[ink(constructor)]

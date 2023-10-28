@@ -1,5 +1,5 @@
 [package]
-name = "nutritionist_nft"
+name = "community"
 version = "1.0.0"
 edition = "2021"
 authors = ["The best developer ever"]
@@ -12,10 +12,10 @@ scale = { package = "parity-scale-codec", version = "3", default-features = fals
 scale-info = { version = "2.6", default-features = false, features = ["derive"], optional = true }
 
 # Include brush as a dependency and enable default implementation for PSP22 via brush feature
-openbrush = { tag = "4.0.0", git = "https://github.com/Brushfam/openbrush-contracts", default-features = false, features = ["psp34", "ownable"] }
+openbrush = { tag = "4.0.0", git = "https://github.com/Brushfam/openbrush-contracts", default-features = false, features = ["ownable"] }
 
 [lib]
-name = "nutritionist_nft"
+name = "community"
 path = "lib.rs"
 
 
