@@ -2,8 +2,8 @@
 
 #[openbrush::implementation(PSP22, PSP22Ownable)]
 #[openbrush::contract]
-pub mod my_psp22 {
-    use openbrush::traits::Storage;
+pub mod treasury {
+    use openbrush::traits::{Storage, String};
 
     #[ink(storage)]
     #[derive(Default, Storage)]
@@ -23,5 +23,7 @@ pub mod my_psp22 {
             ownable::Internal::_init_with_owner(&mut _instance, Self::env().caller());
             _instance
         }
+
+        pub fn withdrawFunds(self, amount: u128, address: String) {}
     }
 }
