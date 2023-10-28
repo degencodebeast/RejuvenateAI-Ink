@@ -3,13 +3,17 @@
 #[openbrush::implementation(Ownable)]
 #[openbrush::contract]
 pub mod community {
-    use ink::{prelude::string::String, storage::Lazy};
+    use ink::{
+        prelude::{string::String, vec::Vec},
+        storage::Lazy,
+    };
     use openbrush::{modifiers, traits::Storage};
 
     pub const USER_APPLICATION_FEE: u128 = 10000000000000000;
     pub const NUTRITIONIST_APPLICATION_FEE: u128 = 5000000000000000;
 
-    #[derive(Debug, scale::Decode, scale::Encode, scale_info::TypeInfo)]
+    #[derive(Debug, scale::Decode, scale::Encode)]
+    #[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
     enum NutritionistApplicationStatus {
         NotApplied,
         Pending,
@@ -18,57 +22,81 @@ pub mod community {
         Canceled,
     }
 
-    #[derive(Debug, scale::Decode, scale::Encode, scale_info::TypeInfo)]
+    #[derive(Debug, scale::Decode, scale::Encode)]
+    #[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
     enum UserSubscriptionStatus {
         NotActive,
         Active,
         Expired,
     }
 
-    #[derive(Debug, scale::Decode, scale::Encode, scale_info::TypeInfo)]
-    struct ConsultationServices {
+    #[derive(Debug, scale::Decode, scale::Encode)]
+    #[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
+    struct ConsultationService {
         consultant: AccountId,
         description: String,
     }
 
-    #[derive(Debug, scale::Decode, scale::Encode, scale_info::TypeInfo)]
-    struct Articles {
+    #[derive(Debug, Clone, scale::Decode, scale::Encode)]
+    #[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
+    struct Article {
         title: String,
         author: AccountId,
         name: String,
         content: String,
     }
 
-    #[derive(Debug, scale::Decode, scale::Encode, scale_info::TypeInfo)]
-    struct FitnessPlans {
+    #[derive(Debug, scale::Decode, scale::Encode)]
+    #[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
+    struct FitnessPlan {
         name: String,
         description: String,
         creator: AccountId,
     }
 
-    #[derive(Debug, scale::Decode, scale::Encode, scale_info::TypeInfo)]
-    struct MealPlans {
+    #[derive(Debug, scale::Decode, scale::Encode)]
+    #[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
+    struct MealPlan {
         name: String,
         description: String,
         creator: AccountId,
     }
 
-    #[derive(Debug, scale::Decode, scale::Encode, scale_info::TypeInfo)]
+    #[derive(Debug, scale::Decode, scale::Encode)]
+    #[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
     struct User {
-        address: AccountId,
+        address: Option<AccountId>,
         data: String, //needs to be encrypted before storing
         sub_status: UserSubscriptionStatus,
         sub_deadline: u128,
     }
 
-    #[derive(Debug, scale::Decode, scale::Encode, scale_info::TypeInfo)]
+    impl User {
+        pub fn new(address: Option<AccountId>, data: String) -> Self {
+            User {
+                address,
+                data,
+                sub_status: UserSubscriptionStatus::NotActive,
+                sub_deadline: 0,
+            }
+        }
+    }
+
+    impl Default for User {
+        fn default() -> Self {
+            Self::new(None, String::new())
+        }
+    }
+
+    #[derive(Debug, scale::Decode, scale::Encode)]
+    #[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
     struct Nutritionist {
         address: AccountId,
         data: String, //needs to be encrypted before storing
-        meal_plans: Vec<MealPlans>,
-        fitness_plans: Vec<FitnessPlans>,
-        services: Vec<ConsultationServices>,
-        articles: Vec<Articles>,
+        meal_plans: Vec<MealPlan>,
+        fitness_plans: Vec<FitnessPlan>,
+        services: Vec<ConsultationService>,
+        articles: Vec<Article>,
         // address: AccountId,
     }
 
@@ -101,9 +129,11 @@ pub mod community {
         #[storage_field]
         ownable: ownable::Data,
         treasury: Lazy<AccountId>,
-        subscription_duration: u128,
-        lilypad_fee: u128,
+        subscription_duration: Lazy<u128>,
+        lilypad_fee: Lazy<u128>,
         nutritionists: Vec<Nutritionist>,
+        articles: Vec<Article>,
+        users: Vec<User>,
     }
 
     impl Community {
@@ -113,8 +143,8 @@ pub mod community {
             let mut instance = Self::default();
             ownable::Internal::_init_with_owner(&mut instance, Self::env().caller());
             instance.treasury.set(&treasury);
-            instance.subscription_duration = 2592000;
-            instance.lilypad_fee = 2;
+            instance.subscription_duration.set(&2592000);
+            instance.lilypad_fee.set(&2);
             instance
         }
 
@@ -137,59 +167,99 @@ pub mod community {
             self.env().emit_event(ReceivedJobResults { job_id, cid });
         }
 
-        //     pub fn  createMealPlan(
-        //     string memory _mealName,
-        //     string memory mealPlanDesc
-        // ) {
-        //     Nutritionist storage _nutritionist = nutritionists[msg.sender];
-        //     MealPlans memory mealPlan = MealPlans(
-        //         _mealName,
-        //         mealPlanDesc,
-        //         msg.sender
-        //     );
-        //     _nutritionist.nutritionistMealplans.push(mealPlan);
-        // }
-
-        // pub fn  createFitnessPlan(
-        //     string memory _fitnessName,
-        //     string memory fitnessDesc
-        // ) {
-        //     Nutritionist storage _nutritionist = nutritionists[msg.sender];
-        //     FitnessPlans memory fitnessPlan = FitnessPlans(
-        //         _fitnessName,
-        //         fitnessDesc,
-        //         msg.sender
-        //     );
-        //     _nutritionist.fitnessPlans.push(fitnessPlan);
-        // }
-
         #[ink(message)]
-        pub fn create_consultation(&self, description: String) {
-            let consultant = self.env().caller();
-            let mut nutritionist = self
-                .nutritionists
-                .into_iter()
-                .filter(|nutritionist| nutritionist.address == consultant);
-            let service = ConsultationServices {
-                consultant,
-                description,
-            };
+        pub fn join_community(&mut self, user_data: String, nft_uri: String) {
+            let sender = self.env().caller();
+            // if self.nutritionists.iter().any(|n| n.address == sender) {
+            //     return Err(AlreadyAMember);
+            // }
+
+            // if self.env().transferred_value() < Some(self.lilypad_fee.get()) {
+            //     return Err(InsufficientPayment);
+            // }
+
+            // let index = self.user_index_counter.get();
+            // self.is_member.insert(sender, true);
+            // let mut user = User::default();
+            // user.user_address = sender;
+            // user.user_personal_data = user_data;
+            // user.sub_status = UserSubscriptionStatus::Active;
+            // user.sub_deadline = self.env().block_timestamp() + self.subscription_duration.get();
+            // self.users.insert(sender, user);
+            // self.user_to_index.insert(sender, index);
+            // self.all_users.push(user);
+            // self.all_user_addresses.push(sender);
+
+            // // mint userNft for the user
+            // self.user_nft.mint(sender, nft_uri);
+            // self.env()
+            //     .transfer(self.treasury.get(), self.env().transferred_balance());
+
+            // Emit event
+            self._emit_new_sign_up(sender, user_data);
         }
 
-        // pub fn publishArticle(
-        //     string memory _title,
-        //     string memory _authorName,
-        //     string memory _content
-        // )  {
-        //     Nutritionist storage _nutritionist = nutritionists[msg.sender];
-        //     Articles memory article = Articles(
-        //         _title,
-        //         msg.sender,
-        //         _authorName,
-        //         _content
-        //     );
-        //     _nutritionist.nutritionistArticles.push(article);
-        //     allArticles.push(article);
-        // }
+        #[ink(message)]
+        pub fn create_meal_plan(&mut self, meal_name: String, meal_plan_desc: String) {
+            let creator = self.env().caller();
+            if let Some(nutritionist) = self.nutritionists.iter_mut().find(|n| n.address == creator)
+            {
+                let meal_plan = MealPlan {
+                    name: meal_name,
+                    description: meal_plan_desc,
+                    creator,
+                };
+                nutritionist.meal_plans.push(meal_plan);
+            }
+        }
+
+        #[ink(message)]
+        pub fn create_fitness_plan(&mut self, fitness_name: String, fitness_desc: String) {
+            let creator = self.env().caller();
+            if let Some(nutritionist) = self.nutritionists.iter_mut().find(|n| n.address == creator)
+            {
+                let fitness_plan = FitnessPlan {
+                    name: fitness_name,
+                    description: fitness_desc,
+                    creator,
+                };
+                nutritionist.fitness_plans.push(fitness_plan);
+            }
+        }
+
+        #[ink(message)]
+        pub fn create_consultation(&mut self, description: String) {
+            let consultant = self.env().caller();
+            if let Some(nutritionist) = self
+                .nutritionists
+                .iter_mut()
+                .find(|n| n.address == consultant)
+            {
+                let service = ConsultationService {
+                    consultant,
+                    description,
+                };
+                nutritionist.services.push(service);
+            }
+        }
+
+        #[ink(message)]
+        pub fn publish_article(&mut self, title: String, author_name: String, content: String) {
+            let publisher = self.env().caller();
+            if let Some(nutritionist) = self
+                .nutritionists
+                .iter_mut()
+                .find(|n| n.address == publisher)
+            {
+                let article = Article {
+                    title,
+                    author: publisher,
+                    name: author_name,
+                    content,
+                };
+                nutritionist.articles.push(article.clone());
+                self.articles.push(article);
+            }
+        }
     }
 }
