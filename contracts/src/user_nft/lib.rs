@@ -3,7 +3,7 @@
 #[openbrush::implementation(Ownable, PSP34, PSP34Burnable, PSP34Mintable, PSP34Metadata)]
 #[openbrush::contract]
 pub mod user_nft {
-    use openbrush::{modifiers, traits::Storage};
+    use openbrush::{contracts::psp34::PSP34Error, modifiers, traits::Storage};
 
     #[ink(storage)]
     #[derive(Default, Storage)]
@@ -14,6 +14,18 @@ pub mod user_nft {
         metadata: metadata::Data,
         #[storage_field]
         ownable: ownable::Data,
+    }
+
+    #[overrider(psp34::Internal)] // we want to override psp22::Internal::_before_token_transfer method
+    fn _before_token_transfer(
+        &mut self,
+        from: Option<&AccountId>,
+        _to: Option<&AccountId>,
+        _amount: &Balance,
+    ) -> Result<(), PSP34Error> {
+        Err(PSP34Error::SafeTransferCheckFailed(String::from(
+            "NFT is SoulBound",
+        )))
     }
 
     #[default_impl(PSP34Burnable)]
