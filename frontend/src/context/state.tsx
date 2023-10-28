@@ -1,7 +1,7 @@
 'use client';
 import { env } from '@/config/environment';
 import { getDeployments } from '@/deployments/deployments';
-import { UseInkathonProvider } from '@scio-labs/use-inkathon';
+//import { UseInkathonProvider } from '@scio-labs/use-inkathon';
 import { createContext, useContext, useState } from 'react';
 import { stateContextType } from '../types/state';
 
