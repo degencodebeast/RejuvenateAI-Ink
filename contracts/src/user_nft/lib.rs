@@ -20,7 +20,7 @@ pub mod user_nft {
             let mut _instance = Self::default();
             psp34::Internal::_mint_to(&mut _instance, Self::env().caller(), Id::U8(1))
                 .expect("Can mint");
-            let collection_id = _instance.collection_id();
+            let collection_id = PSP34::collection_id(&_instance);
             metadata::Internal::_set_attribute(
                 &mut _instance,
                 collection_id.clone(),
