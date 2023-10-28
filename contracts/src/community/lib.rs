@@ -2,8 +2,12 @@
 
 #[openbrush::implementation(Ownable)]
 #[openbrush::contract]
-mod community {
-    use ink::prelude::string::String;
+pub mod community {
+    use ink::{
+        prelude::string::String,
+        storage::{traits::ManualKey, Lazy},
+    };
+    use nutritionist_nft::NutritionistNFT;
     use openbrush::{modifiers, traits::Storage};
 
     pub const USER_APPLICATION_FEE: u128 = 10000000000000000;
@@ -51,6 +55,9 @@ mod community {
     pub struct Community {
         #[storage_field]
         ownable: ownable::Data,
+        treasury: Lazy<AccountId>,
+        subscription_duration: u128,
+        lilypad_fee: u128,
     }
 
     impl Community {
@@ -59,9 +66,9 @@ mod community {
         pub fn new(treasury: AccountId) -> Self {
             let mut instance = Self::default();
             ownable::Internal::_init_with_owner(&mut instance, Self::env().caller());
-            // instance.data.treasury = treasury;
-            // instance.subscription_duration = 2592000;
-            // instance.lilypad_fee = 2;
+            instance.treasury.set(&treasury);
+            instance.subscription_duration = 2592000;
+            instance.lilypad_fee = 2;
             instance
         }
 

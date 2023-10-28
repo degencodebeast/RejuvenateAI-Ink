@@ -55,3 +55,5 @@ pub mod nutritionist_nft {
         }
     }
 }
+
+pub use nutritionist_nft::*;
