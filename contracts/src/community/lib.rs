@@ -1,81 +1,87 @@
 #![cfg_attr(not(feature = "std"), no_std, no_main)]
 
-#[ink::contract]
-mod greeter {
+#[openbrush::implementation(Ownable)]
+#[openbrush::contract]
+mod community {
     use ink::prelude::string::String;
+    use openbrush::{modifiers, traits::Storage};
+
+    pub const USER_APPLICATION_FEE: u128 = 10000000000000000;
+    pub const NUTRITIONIST_APPLICATION_FEE: u128 = 5000000000000000;
 
     #[ink(event)]
-    pub struct Greeted {
-        from: Option<AccountId>,
-        message: String,
+    pub struct NewApplication {
+        applicant: AccountId,
+        data_uri: String,
+    }
+
+    #[ink(event)]
+    pub struct NewSignUp {
+        user: AccountId,
+        data_uri: String,
+    }
+
+    #[ink(event)]
+    pub struct ApplicationApproved {
+        applicant: AccountId,
+    }
+
+    #[ink(event)]
+    pub struct ReceivedJobResults {
+        job_id: u128,
+        cid: String,
+    }
+
+    enum NutritionistApplicationStatus {
+        NotApplied,
+        Pending,
+        Accepted,
+        Rejected,
+        Canceled,
+    }
+
+    enum UserSubscriptionStatus {
+        NotActive,
+        Active,
+        Expired,
     }
 
     #[ink(storage)]
-    pub struct Greeter {
-        message: String,
+    #[derive(Default, Storage)]
+    pub struct Community {
+        #[storage_field]
+        ownable: ownable::Data,
     }
 
-    impl Greeter {
-        /// Creates a new greeter contract initialized with the given value.
+    impl Community {
+        /// Creates a new community contract initialized with the given value.
         #[ink(constructor)]
-        pub fn new(init_value: String) -> Self {
-            Self {
-                message: init_value,
-            }
+        pub fn new(treasury: AccountId) -> Self {
+            let mut instance = Self::default();
+            ownable::Internal::_init_with_owner(&mut instance, Self::env().caller());
+            // instance.data.treasury = treasury;
+            // instance.subscription_duration = 2592000;
+            // instance.lilypad_fee = 2;
+            instance
         }
 
-        /// Creates a new greeter contract initialized to 'Hello ink!'.
-        #[ink(constructor)]
-        pub fn default() -> Self {
-            let default_message = String::from("Hello ink!");
-            Self::new(default_message)
-        }
-
-        /// Returns the current value of `message`.
-        #[ink(message)]
-        pub fn greet(&self) -> String {
-            self.message.clone()
-        }
-
-        /// Sets `message` to the given value.
-        #[ink(message)]
-        pub fn set_message(&mut self, new_value: String) {
-            self.message = new_value.clone();
-
-            let from = self.env().caller();
-            self.env().emit_event(Greeted {
-                from: Some(from),
-                message: new_value,
+        fn _emit_new_application(&self, applicant: AccountId, data_uri: String) {
+            self.env().emit_event(NewApplication {
+                applicant,
+                data_uri,
             });
         }
-    }
 
-    #[cfg(test)]
-    mod tests {
-        use super::*;
-
-        #[ink::test]
-        fn new_works() {
-            let message = "Hello ink! v4".to_string();
-            let greeter = Greeter::new(message.clone());
-            assert_eq!(greeter.greet(), message);
+        fn _emit_new_sign_up(&self, user: AccountId, data_uri: String) {
+            self.env().emit_event(NewSignUp { user, data_uri });
         }
 
-        #[ink::test]
-        fn default_new_works() {
-            let greeter = Greeter::default();
-            let default_message = String::from("Hello ink!");
-            assert_eq!(greeter.greet(), default_message);
+        fn _emit_application_approved(&self, applicant: AccountId) {
+            self.env().emit_event(ApplicationApproved { applicant });
         }
 
-        #[ink::test]
-        fn set_message_works() {
-            let message_1 = String::from("gm ink!");
-            let mut greeter = Greeter::new(message_1.clone());
-            assert_eq!(greeter.greet(), message_1);
-            let message_2 = String::from("gn");
-            greeter.set_message(message_2.clone());
-            assert_eq!(greeter.greet(), message_2);
+        fn _emit_received_job_results(&self, job_id: u128, cid: String) {
+            self.env().emit_event(ReceivedJobResults { job_id, cid });
         }
     }
 }
