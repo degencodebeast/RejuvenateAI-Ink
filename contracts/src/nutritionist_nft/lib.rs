@@ -1,20 +1,20 @@
 #![cfg_attr(not(feature = "std"), no_std, no_main)]
 
-#[openbrush::implementation(PSP34, PSP34Burnable, PSP34Mintable, PSP34Enumerable, PSP34Metadata)]
+#[openbrush::implementation(PSP34, PSP34Burnable, PSP34Mintable, PSP34Metadata)]
 #[openbrush::contract]
-pub mod user_nft {
+pub mod nutritionist_nft {
     use openbrush::traits::Storage;
 
     #[ink(storage)]
     #[derive(Default, Storage)]
-    pub struct UserNFT {
+    pub struct NutritionistNFT {
         #[storage_field]
-        psp34: psp34::Data<Balances>,
+        psp34: psp34::Data,
         #[storage_field]
         metadata: metadata::Data,
     }
 
-    impl UserNFT {
+    impl NutritionistNFT {
         #[ink(constructor)]
         pub fn new() -> Self {
             let mut _instance = Self::default();
@@ -25,13 +25,13 @@ pub mod user_nft {
                 &mut _instance,
                 collection_id.clone(),
                 String::from("name"),
-                String::from("UserNFT"),
+                String::from("NutritionistNFT"),
             );
             metadata::Internal::_set_attribute(
                 &mut _instance,
                 collection_id,
                 String::from("symbol"),
-                String::from("UserNFT"),
+                String::from("NutritionistNFT"),
             );
             _instance
         }
