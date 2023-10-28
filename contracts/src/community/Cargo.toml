@@ -15,8 +15,8 @@ scale-info = { version = "2.6", default-features = false, features = ["derive"],
 openbrush = { tag = "4.0.0", git = "https://github.com/Brushfam/openbrush-contracts", default-features = false, features = ["ownable"] }
 
 # core nfts
-nutritionist_nft = { path = "../nutritionist_nft" }
-user_nft = { path = "../user_nft" }
+nutritionist_nft = { path = "../nutritionist_nft",version = "1.0.0" }
+user_nft = { path = "../user_nft",version = "1.0.0" }
 
 [lib]
 name = "community"
