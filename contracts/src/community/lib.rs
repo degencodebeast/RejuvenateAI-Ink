@@ -7,6 +7,7 @@ pub mod community {
         prelude::{string::String, vec::Vec},
         storage::Lazy,
     };
+    use nutritionist_nft::NutritionistNFTRef;
     use openbrush::{modifiers, traits::Storage};
 
     pub const USER_APPLICATION_FEE: u128 = 10000000000000000;
@@ -28,6 +29,13 @@ pub mod community {
         NotActive,
         Active,
         Expired,
+    }
+
+    #[derive(Debug, scale::Decode, scale::Encode)]
+    #[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
+    pub enum CommunityActionError {
+        AlreadyAMember,
+        InsufficientPayment,
     }
 
     #[derive(Debug, scale::Decode, scale::Encode)]
@@ -76,7 +84,7 @@ pub mod community {
             User {
                 address,
                 data,
-                sub_status: UserSubscriptionStatus::NotActive,
+                sub_status: UserSubscriptionStatus::Active,
                 sub_deadline: 0,
             }
         }
@@ -168,35 +176,42 @@ pub mod community {
         }
 
         #[ink(message)]
-        pub fn join_community(&mut self, user_data: String, nft_uri: String) {
+        pub fn join_community(
+            &mut self,
+            user_data: String,
+            nft_uri: String,
+        ) -> Result<(), CommunityActionError> {
             let sender = self.env().caller();
-            // if self.nutritionists.iter().any(|n| n.address == sender) {
-            //     return Err(AlreadyAMember);
-            // }
+            if self.nutritionists.iter().any(|n| n.address == sender) {
+                return Err(CommunityActionError::AlreadyAMember);
+            }
 
-            // if self.env().transferred_value() < Some(self.lilypad_fee.get()) {
-            //     return Err(InsufficientPayment);
-            // }
+            let lilypad_fee = self.lilypad_fee.get().unwrap();
+            if self.env().transferred_value() < lilypad_fee {
+                return Err(CommunityActionError::InsufficientPayment);
+            }
 
-            // let index = self.user_index_counter.get();
-            // self.is_member.insert(sender, true);
-            // let mut user = User::default();
-            // user.user_address = sender;
-            // user.user_personal_data = user_data;
-            // user.sub_status = UserSubscriptionStatus::Active;
-            // user.sub_deadline = self.env().block_timestamp() + self.subscription_duration.get();
-            // self.users.insert(sender, user);
+            let mut user = User::new(Some(sender), user_data.clone());
+            user.sub_deadline =
+                (self.env().block_timestamp() as u128) + self.subscription_duration.get().unwrap();
+
+            // save the user
+            self.users.push(user);
+
             // self.user_to_index.insert(sender, index);
             // self.all_users.push(user);
             // self.all_user_addresses.push(sender);
 
             // // mint userNft for the user
             // self.user_nft.mint(sender, nft_uri);
-            // self.env()
-            //     .transfer(self.treasury.get(), self.env().transferred_balance());
+
+            let _ = self
+                .env()
+                .transfer(self.treasury.get().unwrap(), self.env().transferred_value());
 
             // Emit event
-            self._emit_new_sign_up(sender, user_data);
+            self._emit_new_sign_up(sender, user_data.clone());
+            Ok(())
         }
 
         #[ink(message)]

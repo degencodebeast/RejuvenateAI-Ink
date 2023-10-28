@@ -1,6 +1,6 @@
 {
   "source": {
-    "hash": "0x003c0d788ed1f901494d3f4e93babd169953128be14b412b71c6d6b43e1e566a",
+    "hash": "0x1607e75b1ac54254d4c2752c9bab126bb5c1abe53ef4c95d42a35156628295fa",
     "language": "ink! 4.3.0",
     "compiler": "rustc 1.72.0",
     "build_info": {
@@ -68,26 +68,26 @@
         "displayName": [
           "BlockNumber"
         ],
-        "type": 28
+        "type": 31
       },
       "chainExtension": {
         "displayName": [
           "ChainExtension"
         ],
-        "type": 29
+        "type": 32
       },
       "hash": {
         "displayName": [
           "Hash"
         ],
-        "type": 26
+        "type": 29
       },
       "maxEventTopics": 4,
       "timestamp": {
         "displayName": [
           "Timestamp"
         ],
-        "type": 27
+        "type": 30
       }
     },
     "events": [
@@ -232,7 +232,7 @@
             "ink",
             "MessageResult"
           ],
-          "type": 19
+          "type": 22
         },
         "selector": "0xff5a574b"
       },
@@ -388,7 +388,7 @@
             "ink",
             "MessageResult"
           ],
-          "type": 22
+          "type": 25
         },
         "selector": "0x4fa43c8c"
       },
@@ -404,7 +404,7 @@
             "ink",
             "MessageResult"
           ],
-          "type": 23
+          "type": 26
         },
         "selector": "0x5e228753"
       },
@@ -431,7 +431,7 @@
             "ink",
             "MessageResult"
           ],
-          "type": 23
+          "type": 26
         },
         "selector": "0x11f43efd"
       }
@@ -1023,6 +1023,114 @@
               {
                 "fields": [
                   {
+                    "type": 23
+                  }
+                ],
+                "index": 0,
+                "name": "Ok"
+              },
+              {
+                "fields": [
+                  {
+                    "type": 21
+                  }
+                ],
+                "index": 1,
+                "name": "Err"
+              }
+            ]
+          }
+        },
+        "params": [
+          {
+            "name": "T",
+            "type": 23
+          },
+          {
+            "name": "E",
+            "type": 21
+          }
+        ],
+        "path": [
+          "Result"
+        ]
+      }
+    },
+    {
+      "id": 23,
+      "type": {
+        "def": {
+          "variant": {
+            "variants": [
+              {
+                "fields": [
+                  {
+                    "type": 20
+                  }
+                ],
+                "index": 0,
+                "name": "Ok"
+              },
+              {
+                "fields": [
+                  {
+                    "type": 24
+                  }
+                ],
+                "index": 1,
+                "name": "Err"
+              }
+            ]
+          }
+        },
+        "params": [
+          {
+            "name": "T",
+            "type": 20
+          },
+          {
+            "name": "E",
+            "type": 24
+          }
+        ],
+        "path": [
+          "Result"
+        ]
+      }
+    },
+    {
+      "id": 24,
+      "type": {
+        "def": {
+          "variant": {
+            "variants": [
+              {
+                "index": 0,
+                "name": "AlreadyAMember"
+              },
+              {
+                "index": 1,
+                "name": "InsufficientPayment"
+              }
+            ]
+          }
+        },
+        "path": [
+          "community",
+          "community",
+          "CommunityActionError"
+        ]
+      }
+    },
+    {
+      "id": 25,
+      "type": {
+        "def": {
+          "variant": {
+            "variants": [
+              {
+                "fields": [
+                  {
                     "type": 17
                   }
                 ],
@@ -1057,7 +1165,7 @@
       }
     },
     {
-      "id": 23,
+      "id": 26,
       "type": {
         "def": {
           "variant": {
@@ -1065,7 +1173,7 @@
               {
                 "fields": [
                   {
-                    "type": 24
+                    "type": 27
                   }
                 ],
                 "index": 0,
@@ -1086,7 +1194,7 @@
         "params": [
           {
             "name": "T",
-            "type": 24
+            "type": 27
           },
           {
             "name": "E",
@@ -1099,7 +1207,7 @@
       }
     },
     {
-      "id": 24,
+      "id": 27,
       "type": {
         "def": {
           "variant": {
@@ -1116,7 +1224,7 @@
               {
                 "fields": [
                   {
-                    "type": 25
+                    "type": 28
                   }
                 ],
                 "index": 1,
@@ -1132,7 +1240,7 @@
           },
           {
             "name": "E",
-            "type": 25
+            "type": 28
           }
         ],
         "path": [
@@ -1141,7 +1249,7 @@
       }
     },
     {
-      "id": 25,
+      "id": 28,
       "type": {
         "def": {
           "variant": {
@@ -1167,7 +1275,7 @@
       }
     },
     {
-      "id": 26,
+      "id": 29,
       "type": {
         "def": {
           "composite": {
@@ -1187,7 +1295,7 @@
       }
     },
     {
-      "id": 27,
+      "id": 30,
       "type": {
         "def": {
           "primitive": "u64"
@@ -1195,7 +1303,7 @@
       }
     },
     {
-      "id": 28,
+      "id": 31,
       "type": {
         "def": {
           "primitive": "u32"
@@ -1203,7 +1311,7 @@
       }
     },
     {
-      "id": 29,
+      "id": 32,
       "type": {
         "def": {
           "variant": {}
