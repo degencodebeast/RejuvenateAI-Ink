@@ -163,14 +163,17 @@ pub mod community {
         //     _nutritionist.fitnessPlans.push(fitnessPlan);
         // }
 
-        pub fn createConsultation(self, description: String) {
-            let caller = self.env().caller();
-            let nutritionist = self.nutritionists;
-            // ConsultationServices memory consultationService = ConsultationServices(
-            //     msg.sender,
-            //     _consultationDesc
-            // );
-            // _nutritionist.consultationServices = consultationService;
+        #[ink(message)]
+        pub fn create_consultation(&self, description: String) {
+            let consultant = self.env().caller();
+            let mut nutritionist = self
+                .nutritionists
+                .into_iter()
+                .filter(|nutritionist| nutritionist.address == consultant);
+            let service = ConsultationServices {
+                consultant,
+                description,
+            };
         }
 
         // pub fn publishArticle(
