@@ -8,15 +8,16 @@ pub mod community {
         storage::Lazy,
     };
     use nutritionist_nft::NutritionistNFTRef;
-    use openbrush::contracts::psp34::{
-        extensions::mintable::psp34mintable_external::PSP34Mintable, Id,
+    use openbrush::contracts::{
+        ownable::OwnableError,
+        psp34::{extensions::mintable::psp34mintable_external::PSP34Mintable, Id},
     };
     use openbrush::{modifiers, traits::Storage};
 
     pub const USER_APPLICATION_FEE: u128 = 10000000000000000;
     pub const NUTRITIONIST_APPLICATION_FEE: u128 = 5000000000000000;
 
-    #[derive(Debug, scale::Decode, scale::Encode)]
+    #[derive(Clone, Debug, PartialEq, scale::Decode, scale::Encode)]
     #[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
     enum NutritionistApplicationStatus {
         NotApplied,
@@ -26,7 +27,7 @@ pub mod community {
         Canceled,
     }
 
-    #[derive(Clone, Debug, scale::Decode, scale::Encode)]
+    #[derive(Clone, Debug, PartialEq, scale::Decode, scale::Encode)]
     #[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
     enum UserSubscriptionStatus {
         NotActive,
@@ -39,7 +40,17 @@ pub mod community {
     pub enum CommunityActionError {
         NotAMember,
         AlreadyAMember,
+        NotANutritionist,
+        AlreadyANutritionist,
         InsufficientPayment,
+        InvalidSubStatus,
+        OnlyOwner,
+    }
+
+    impl From<OwnableError> for CommunityActionError {
+        fn from(_: OwnableError) -> CommunityActionError {
+            CommunityActionError::OnlyOwner
+        }
     }
 
     #[derive(Clone, Debug, scale::Decode, scale::Encode)]
@@ -109,7 +120,7 @@ pub mod community {
         fitness_plans: Vec<FitnessPlan>,
         services: Vec<ConsultationService>,
         articles: Vec<Article>,
-        // address: AccountId,
+        status: NutritionistApplicationStatus,
     }
 
     #[derive(Debug, scale::Decode, scale::Encode)]
@@ -233,6 +244,20 @@ pub mod community {
         }
 
         #[ink(message)]
+        #[modifiers(only_owner)]
+        pub fn set_nfts(
+            &mut self,
+            user_nft: Hash,
+            nutritionist_nft: Hash,
+        ) -> Result<(), CommunityActionError> {
+            let mut config = self.config.get().unwrap();
+            config.user_nft_hash = Some(user_nft);
+            config.nutritionist_nft_hash = Some(nutritionist_nft);
+            self.config.set(&config);
+            Ok(())
+        }
+
+        #[ink(message)]
         pub fn join_community(
             &mut self,
             user_data: String,
@@ -274,6 +299,51 @@ pub mod community {
 
             // Emit event
             self._emit_new_sign_up(sender, user_data.clone());
+            Ok(())
+        }
+
+        #[ink(message)]
+        #[modifiers(only_owner)]
+        pub fn reject_nutritionist_role(
+            &mut self,
+            applicant: AccountId,
+        ) -> Result<(), CommunityActionError> {
+            let mut store = self.store.get().unwrap();
+
+            if store.nutritionists.iter().any(|n| n.address == applicant) {
+                return Err(CommunityActionError::AlreadyANutritionist);
+            }
+
+            if let Some(nutritionist) = store
+                .nutritionists
+                .iter_mut()
+                .find(|n| n.address == applicant)
+            {
+                nutritionist.status = NutritionistApplicationStatus::Rejected;
+            }
+
+            self.store.set(&store);
+
+            Ok(())
+        }
+
+        #[ink(message)]
+        pub fn renew_subscription(&mut self) -> Result<(), CommunityActionError> {
+            let sender = self.env().caller();
+            let mut store = self.store.get().unwrap();
+
+            if let Some(user) = store
+                .users
+                .iter_mut()
+                .find(|u| u.address.unwrap() == sender)
+            {
+                if user.sub_status != UserSubscriptionStatus::Expired {
+                    return Err(CommunityActionError::InvalidSubStatus);
+                }
+                user.sub_status = UserSubscriptionStatus::Active;
+            }
+
+            self.store.set(&store);
             Ok(())
         }
 
