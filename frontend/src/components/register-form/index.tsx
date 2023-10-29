@@ -8,7 +8,6 @@ import * as Yup from 'yup';
 //import { putJSONandGetHash } from '@/helpers/prompt';
 import { putJSONandGetHash } from '@/helpers/prompt';
 import { toast } from 'react-toastify';
-import { toast } from 'react-toastify';
 
 const RegisterForm = () => {
   //const auth = useAuth()
