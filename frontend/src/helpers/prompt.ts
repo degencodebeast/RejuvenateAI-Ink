@@ -1,17 +1,17 @@
-import { Petit_Formal_Script } from 'next/font/google'
+import { Petit_Formal_Script } from 'next/font/google';
 
-import { Web3Storage } from 'web3.storage'
+import { Web3Storage } from 'web3.storage';
 
 function getAccessToken() {
-  return process.env.NEXT_PUBLIC_WEB3STORAGE_API_TOKEN
+  return process.env.NEXT_PUBLIC_WEB3STORAGE_API_TOKEN;
 }
 
 function makeStorageClient() {
-  const token = getAccessToken() as string
-  return new Web3Storage({ token })
+  const token = getAccessToken() as string;
+  return new Web3Storage({ token });
 }
 export const uploadPromptToIpfs = async (data: any) => {
-  const client = makeStorageClient()
+  const client = makeStorageClient();
   const prompt = {
     template: `
     You are a robot built by rejuvenateAI. Your goal is to predict the rate of aging of users.
@@ -101,15 +101,15 @@ export const uploadPromptToIpfs = async (data: any) => {
             Respond with either Reverse, Fast, Moderate, or Slow. Remember as a json object./n
             "}
         `,
-  }
+  };
 
   const content = new Blob([JSON.stringify(prompt)], {
     type: 'application/json',
-  })
+  });
   const fileObj = new File([content], 'file.json', {
     type: 'application/json',
-  })
-  const res = await client.put([fileObj])
-  console.log(res)
-  return res
-}
+  });
+  const res = await client.put([fileObj]);
+  console.log(res);
+  return res;
+};

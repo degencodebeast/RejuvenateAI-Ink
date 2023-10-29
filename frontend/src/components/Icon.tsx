@@ -3,9 +3,9 @@ export default function Icon({
   fill = true,
   size = 36,
 }: {
-  name: string
-  fill?: boolean
-  size?: number
+  name: string;
+  fill?: boolean;
+  size?: number;
 }) {
   return (
     <span
@@ -14,5 +14,5 @@ export default function Icon({
     >
       {name}
     </span>
-  )
+  );
 }
