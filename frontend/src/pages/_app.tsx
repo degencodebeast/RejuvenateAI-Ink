@@ -3,6 +3,8 @@ import './globals.css';
 import type { AppProps } from 'next/app';
 import Providers from './providers';
 import Head from 'next/head';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 //import { env } from '@/config/environment'
 //import { getDeployments } from '@/deployments/deployments'
 
@@ -21,6 +23,7 @@ export default function App({ Component, pageProps }: AppProps) {
         <title>RejuvenateAI</title>
       </Head>
       <Providers>
+        <ToastContainer />
         <Component {...pageProps} />
       </Providers>
     </>
