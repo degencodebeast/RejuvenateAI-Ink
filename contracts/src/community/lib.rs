@@ -8,6 +8,9 @@ pub mod community {
         storage::Lazy,
     };
     use nutritionist_nft::NutritionistNFTRef;
+    use openbrush::contracts::psp34::{
+        extensions::mintable::psp34mintable_external::PSP34Mintable, Id,
+    };
     use openbrush::{modifiers, traits::Storage};
 
     pub const USER_APPLICATION_FEE: u128 = 10000000000000000;
@@ -23,7 +26,7 @@ pub mod community {
         Canceled,
     }
 
-    #[derive(Debug, scale::Decode, scale::Encode)]
+    #[derive(Clone, Debug, scale::Decode, scale::Encode)]
     #[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
     enum UserSubscriptionStatus {
         NotActive,
@@ -34,11 +37,12 @@ pub mod community {
     #[derive(Debug, scale::Decode, scale::Encode)]
     #[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
     pub enum CommunityActionError {
+        NotAMember,
         AlreadyAMember,
         InsufficientPayment,
     }
 
-    #[derive(Debug, scale::Decode, scale::Encode)]
+    #[derive(Clone, Debug, scale::Decode, scale::Encode)]
     #[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
     struct ConsultationService {
         consultant: AccountId,
@@ -54,7 +58,7 @@ pub mod community {
         content: String,
     }
 
-    #[derive(Debug, scale::Decode, scale::Encode)]
+    #[derive(Clone, Debug, scale::Decode, scale::Encode)]
     #[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
     struct FitnessPlan {
         name: String,
@@ -62,7 +66,7 @@ pub mod community {
         creator: AccountId,
     }
 
-    #[derive(Debug, scale::Decode, scale::Encode)]
+    #[derive(Clone, Debug, scale::Decode, scale::Encode)]
     #[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
     struct MealPlan {
         name: String,
@@ -70,9 +74,9 @@ pub mod community {
         creator: AccountId,
     }
 
-    #[derive(Debug, scale::Decode, scale::Encode)]
+    #[derive(Clone, Debug, scale::Decode, scale::Encode)]
     #[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
-    struct User {
+    pub struct User {
         address: Option<AccountId>,
         data: String, //needs to be encrypted before storing
         sub_status: UserSubscriptionStatus,
@@ -96,9 +100,9 @@ pub mod community {
         }
     }
 
-    #[derive(Debug, scale::Decode, scale::Encode)]
+    #[derive(Clone, Debug, scale::Decode, scale::Encode)]
     #[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
-    struct Nutritionist {
+    pub struct Nutritionist {
         address: AccountId,
         data: String, //needs to be encrypted before storing
         meal_plans: Vec<MealPlan>,
@@ -106,6 +110,45 @@ pub mod community {
         services: Vec<ConsultationService>,
         articles: Vec<Article>,
         // address: AccountId,
+    }
+
+    #[derive(Debug, scale::Decode, scale::Encode)]
+    #[cfg_attr(
+        feature = "std",
+        derive(scale_info::TypeInfo, ink::storage::traits::StorageLayout)
+    )]
+    struct CommunityConfig {
+        // configs
+        treasury: AccountId,
+        subscription_duration: u128,
+        lilypad_fee: u128,
+
+        // hashes
+        nutritionist_nft_hash: Option<Hash>,
+        user_nft_hash: Option<Hash>,
+    }
+
+    impl CommunityConfig {
+        pub fn new(treasury: AccountId) -> Self {
+            CommunityConfig {
+                treasury,
+                lilypad_fee: 2,
+                subscription_duration: 2592000,
+                nutritionist_nft_hash: None,
+                user_nft_hash: None,
+            }
+        }
+    }
+
+    #[derive(Debug, scale::Decode, scale::Encode)]
+    #[cfg_attr(
+        feature = "std",
+        derive(scale_info::TypeInfo, ink::storage::traits::StorageLayout)
+    )]
+    struct CommunityStore {
+        nutritionists: Vec<Nutritionist>,
+        articles: Vec<Article>,
+        users: Vec<User>,
     }
 
     #[ink(event)]
@@ -136,12 +179,8 @@ pub mod community {
     pub struct Community {
         #[storage_field]
         ownable: ownable::Data,
-        treasury: Lazy<AccountId>,
-        subscription_duration: Lazy<u128>,
-        lilypad_fee: Lazy<u128>,
-        nutritionists: Vec<Nutritionist>,
-        articles: Vec<Article>,
-        users: Vec<User>,
+        config: Lazy<CommunityConfig>,
+        store: Lazy<CommunityStore>,
     }
 
     impl Community {
@@ -150,9 +189,7 @@ pub mod community {
         pub fn new(treasury: AccountId) -> Self {
             let mut instance = Self::default();
             ownable::Internal::_init_with_owner(&mut instance, Self::env().caller());
-            instance.treasury.set(&treasury);
-            instance.subscription_duration.set(&2592000);
-            instance.lilypad_fee.set(&2);
+            instance.config.set(&CommunityConfig::new(treasury));
             instance
         }
 
@@ -175,39 +212,65 @@ pub mod community {
             self.env().emit_event(ReceivedJobResults { job_id, cid });
         }
 
+        fn _mint_nutritionist_nft(&self, user: AccountId, nft_id: Id) {
+            let nutritionist_nft_hash = self.config.get().unwrap().nutritionist_nft_hash;
+            let mut nutritionist_nft = NutritionistNFTRef::new()
+                .code_hash(nutritionist_nft_hash.unwrap())
+                .endowment(0)
+                .salt_bytes([0xDE, 0xAD, 0xBE, 0xEF])
+                .instantiate();
+            let _ = nutritionist_nft.mint(user, nft_id);
+        }
+
+        fn _mint_user_nft(&self, user: AccountId, nft_id: Id) {
+            let user_nft_hash = self.config.get().unwrap().user_nft_hash;
+            let mut user_nft = NutritionistNFTRef::new()
+                .code_hash(user_nft_hash.unwrap())
+                .endowment(0)
+                .salt_bytes([0xDE, 0xAD, 0xBE, 0xEF])
+                .instantiate();
+            let _ = user_nft.mint(user, nft_id);
+        }
+
         #[ink(message)]
         pub fn join_community(
             &mut self,
             user_data: String,
-            nft_uri: String,
+            nft_id: Id,
         ) -> Result<(), CommunityActionError> {
             let sender = self.env().caller();
-            if self.nutritionists.iter().any(|n| n.address == sender) {
+            let mut store = self.store.get().unwrap();
+
+            if store.nutritionists.iter().any(|n| n.address == sender) {
                 return Err(CommunityActionError::AlreadyAMember);
             }
 
-            let lilypad_fee = self.lilypad_fee.get().unwrap();
+            let CommunityConfig {
+                treasury,
+                lilypad_fee,
+                subscription_duration,
+                ..
+            } = self.config.get().unwrap();
+
             if self.env().transferred_value() < lilypad_fee {
                 return Err(CommunityActionError::InsufficientPayment);
             }
 
             let mut user = User::new(Some(sender), user_data.clone());
-            user.sub_deadline =
-                (self.env().block_timestamp() as u128) + self.subscription_duration.get().unwrap();
+            user.sub_deadline = (self.env().block_timestamp() as u128) + subscription_duration;
+
+            // mint nft
+            self._mint_user_nft(sender, nft_id);
 
             // save the user
-            self.users.push(user);
+            store.users.push(user);
 
-            // self.user_to_index.insert(sender, index);
-            // self.all_users.push(user);
-            // self.all_user_addresses.push(sender);
-
-            // // mint userNft for the user
-            // self.user_nft.mint(sender, nft_uri);
+            // update the store
+            self.store.set(&store);
 
             let _ = self
                 .env()
-                .transfer(self.treasury.get().unwrap(), self.env().transferred_value());
+                .transfer(treasury, self.env().transferred_value());
 
             // Emit event
             self._emit_new_sign_up(sender, user_data.clone());
@@ -217,7 +280,12 @@ pub mod community {
         #[ink(message)]
         pub fn create_meal_plan(&mut self, meal_name: String, meal_plan_desc: String) {
             let creator = self.env().caller();
-            if let Some(nutritionist) = self.nutritionists.iter_mut().find(|n| n.address == creator)
+            let mut store = self.store.get().unwrap();
+
+            if let Some(nutritionist) = store
+                .nutritionists
+                .iter_mut()
+                .find(|n| n.address == creator)
             {
                 let meal_plan = MealPlan {
                     name: meal_name,
@@ -226,12 +294,19 @@ pub mod community {
                 };
                 nutritionist.meal_plans.push(meal_plan);
             }
+
+            self.store.set(&store);
         }
 
         #[ink(message)]
         pub fn create_fitness_plan(&mut self, fitness_name: String, fitness_desc: String) {
             let creator = self.env().caller();
-            if let Some(nutritionist) = self.nutritionists.iter_mut().find(|n| n.address == creator)
+            let mut store = self.store.get().unwrap();
+
+            if let Some(nutritionist) = store
+                .nutritionists
+                .iter_mut()
+                .find(|n| n.address == creator)
             {
                 let fitness_plan = FitnessPlan {
                     name: fitness_name,
@@ -240,12 +315,15 @@ pub mod community {
                 };
                 nutritionist.fitness_plans.push(fitness_plan);
             }
+            self.store.set(&store);
         }
 
         #[ink(message)]
         pub fn create_consultation(&mut self, description: String) {
             let consultant = self.env().caller();
-            if let Some(nutritionist) = self
+            let mut store = self.store.get().unwrap();
+
+            if let Some(nutritionist) = store
                 .nutritionists
                 .iter_mut()
                 .find(|n| n.address == consultant)
@@ -256,12 +334,15 @@ pub mod community {
                 };
                 nutritionist.services.push(service);
             }
+            self.store.set(&store);
         }
 
         #[ink(message)]
         pub fn publish_article(&mut self, title: String, author_name: String, content: String) {
             let publisher = self.env().caller();
-            if let Some(nutritionist) = self
+            let mut store = self.store.get().unwrap();
+
+            if let Some(nutritionist) = store
                 .nutritionists
                 .iter_mut()
                 .find(|n| n.address == publisher)
@@ -273,8 +354,21 @@ pub mod community {
                     content,
                 };
                 nutritionist.articles.push(article.clone());
-                self.articles.push(article);
+                store.articles.push(article);
             }
+            self.store.set(&store);
+        }
+
+        #[ink(message)]
+        pub fn get_nutritionists(&self) -> Vec<Nutritionist> {
+            let store = self.store.get().unwrap();
+            store.nutritionists.clone()
+        }
+
+        #[ink(message)]
+        pub fn get_users(&self) -> Vec<User> {
+            let store = self.store.get().unwrap();
+            store.users.clone()
         }
     }
 }

@@ -32,6 +32,10 @@ pub mod nutritionist_nft {
     #[modifiers(only_owner)]
     fn burn(&mut self) {}
 
+    #[default_impl(PSP34Mintable)]
+    #[modifiers(only_owner)]
+    fn mint(&mut self) {}
+
     impl NutritionistNFT {
         #[ink(constructor)]
         pub fn new() -> Self {
