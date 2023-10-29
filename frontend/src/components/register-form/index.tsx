@@ -5,8 +5,9 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as Yup from 'yup';
-//import { uploadPromptToIpfs } from '@/helpers/prompt';
+//import { putJSONandGetHash } from '@/helpers/prompt';
 import { putJSONandGetHash } from '@/helpers/prompt';
+import { toast } from 'react-toastify';
 import { toast } from 'react-toastify';
 
 const RegisterForm = () => {

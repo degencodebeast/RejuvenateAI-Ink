@@ -7,6 +7,7 @@ import RejuvenateAi from '../../images/svg/rejuvenate-logo.svg';
 import RegisterForm from '../register-form';
 import { useWallet, useAllWallets } from 'useink';
 import dynamic from 'next/dynamic';
+import { toast } from 'react-toastify';
 
 const ConnectWallet = dynamic(() => import('../connectWallet'), {
   ssr: false,
@@ -22,6 +23,7 @@ const Header = ({ bg = 'transparent' }: { bg?: string }) => {
 
   useEffect(() => {
     setAddress(account?.address || '');
+    account ?? toast.success('Wallet Connected Succesfully');
   }, [account]);
 
   return (
