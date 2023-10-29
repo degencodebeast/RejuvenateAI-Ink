@@ -113,3 +113,15 @@ export const uploadPromptToIpfs = async (data: any) => {
   console.log(res);
   return res;
 };
+
+export const putJSONandGetHash = async (json: any) => {
+  const client = makeStorageClient();
+  const content = new Blob([JSON.stringify(json)], {
+    type: 'application/json',
+  });
+  const fileObj = new File([content], 'file.json', {
+    type: 'application/json',
+  });
+  const res = await client.put([fileObj]);
+  return res;
+};

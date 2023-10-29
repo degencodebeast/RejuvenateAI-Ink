@@ -1,7 +1,7 @@
 import { PropsWithChildren, createContext, useContext } from 'react';
 import { Call, ChainContract, Tx, useCall, useContract, useTx } from 'useink';
 import { useTxNotifications } from 'useink/notifications';
-import { CONTRACT_ADDRESS, metadata } from '../constants';
+import { CONTRACT_ADDRESS, metadata } from '../constant';
 
 interface CommunityContractState {
   community?: ChainContract;

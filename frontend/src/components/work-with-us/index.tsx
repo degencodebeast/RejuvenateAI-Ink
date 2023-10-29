@@ -1,5 +1,6 @@
 import Workwithus from '@/images/png/work-with-us.png';
 import Image from 'next/image';
+import NutritionistForm from '../nutritionist-form';
 
 const WorkWithUs = () => {
   return (
@@ -26,9 +27,21 @@ const WorkWithUs = () => {
             Are you a top tier professional nutritionist and looking to work
             with us? Get in touch with our partnership team here.
           </p>
-          <button className='bg-primaryGreen max-w-[220px] h-[48px] px-5 hover:bg-primaryYellow hover:text-primaryBeige lg:h-[59px] font-bold text-base lg:text-[20px] text-[#F5F5DC] rounded-xl'>
-            Join us
-          </button>
+          <>
+            <label
+              className='bg-primaryGreen max-w-[220px] h-[48px] px-5 hover:bg-primaryYellow hover:text-primaryBeige lg:h-[59px] font-bold text-base lg:text-[20px] text-[#F5F5DC] rounded-xl'
+              htmlFor='modal-3'
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              Join us
+            </label>
+            <input className='modal-state' id='modal-3' type='checkbox' />
+            <NutritionistForm />
+          </>
         </div>
       </section>
     </div>
