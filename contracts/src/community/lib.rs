@@ -45,6 +45,7 @@ pub mod community {
         InsufficientPayment,
         InvalidSubStatus,
         OnlyOwner,
+        UnauthorizedApplication(String),
     }
 
     impl From<OwnableError> for CommunityActionError {
@@ -123,6 +124,14 @@ pub mod community {
         status: NutritionistApplicationStatus,
     }
 
+    #[derive(Clone, Debug, scale::Decode, scale::Encode)]
+    #[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
+    struct NutritionistApplication {
+        data_uri: String,
+        address: AccountId,
+        status: NutritionistApplicationStatus,
+    }
+
     #[derive(Debug, scale::Decode, scale::Encode)]
     #[cfg_attr(
         feature = "std",
@@ -160,6 +169,7 @@ pub mod community {
         nutritionists: Vec<Nutritionist>,
         articles: Vec<Article>,
         users: Vec<User>,
+        nutritionist_applications: Vec<NutritionistApplication>,
     }
 
     #[ink(event)]
@@ -303,6 +313,78 @@ pub mod community {
         }
 
         #[ink(message)]
+        pub fn apply_for_nutritionist_role(
+            &mut self,
+            data_uri: String,
+        ) -> Result<(), CommunityActionError> {
+            let sender = self.env().caller();
+            let mut store = self.store.get().unwrap();
+
+            if store.nutritionists.iter().any(|n| n.address == sender) {
+                return Err(CommunityActionError::AlreadyANutritionist);
+            }
+
+            let applicant_status = store
+                .nutritionist_applications
+                .iter()
+                .find(|n| n.address == sender)
+                .map(|n| &n.status)
+                .unwrap_or(&NutritionistApplicationStatus::NotApplied);
+
+            if *applicant_status == NutritionistApplicationStatus::Pending
+                || *applicant_status == NutritionistApplicationStatus::Accepted
+            {
+                return Err(CommunityActionError::UnauthorizedApplication(String::from(
+                    "Community: already applied/pending",
+                )));
+            }
+
+            let CommunityConfig { treasury, .. } = self.config.get().unwrap();
+
+            let nutritionist_application_fee = NUTRITIONIST_APPLICATION_FEE;
+            if self.env().transferred_value() < nutritionist_application_fee {
+                return Err(CommunityActionError::InsufficientPayment);
+            }
+
+            let application = NutritionistApplication {
+                data_uri: data_uri.clone(),
+                address: sender,
+                status: applicant_status.clone(),
+            };
+            store.nutritionist_applications.push(application);
+
+            let _ = self
+                .env()
+                .transfer(treasury, self.env().transferred_value());
+
+            // Emit event
+            self._emit_new_application(sender, data_uri.clone());
+            Ok(())
+        }
+
+        #[ink(message)]
+        pub fn cancel_nutritionist_application(&mut self) -> Result<(), CommunityActionError> {
+            let sender = self.env().caller();
+            let mut store = self.store.get().unwrap();
+
+            if store.nutritionists.iter().any(|n| n.address == sender) {
+                return Err(CommunityActionError::AlreadyANutritionist);
+            }
+
+            if let Some(application) = store
+                .nutritionist_applications
+                .iter_mut()
+                .find(|n| n.address == sender)
+            {
+                application.status = NutritionistApplicationStatus::Canceled;
+            }
+
+            self.store.set(&store);
+
+            Ok(())
+        }
+
+        #[ink(message)]
         #[modifiers(only_owner)]
         pub fn reject_nutritionist_role(
             &mut self,
@@ -430,13 +512,13 @@ pub mod community {
         }
 
         #[ink(message)]
-        pub fn get_nutritionists(&self) -> Vec<Nutritionist> {
+        pub fn get_all_nutritionists(&self) -> Vec<Nutritionist> {
             let store = self.store.get().unwrap();
             store.nutritionists.clone()
         }
 
         #[ink(message)]
-        pub fn get_users(&self) -> Vec<User> {
+        pub fn get_all_members(&self) -> Vec<User> {
             let store = self.store.get().unwrap();
             store.users.clone()
         }
