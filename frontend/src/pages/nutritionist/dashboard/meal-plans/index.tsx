@@ -61,7 +61,7 @@ export default function DashBoard() {
                     size={'sm'}
                     variant={'outline'}
                     rounded={'full'}
-                    className='text-primaryGreen'
+                    className='text-primaryGreen border-primaryGreen'
                   >
                     View
                   </Button>
