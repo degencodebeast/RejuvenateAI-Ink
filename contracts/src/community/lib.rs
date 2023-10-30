@@ -12,8 +12,7 @@ pub mod community {
     use openbrush::{modifiers, traits::Storage};
     use user_nft::user_nft::UserNFTRef;
 
-    pub const USER_APPLICATION_FEE: u128 = 10000000000000000;
-    pub const NUTRITIONIST_APPLICATION_FEE: u128 = 5000000000000000;
+    pub const NUTRITIONIST_APPLICATION_FEE: u128 = 0;
 
     #[derive(Clone, Debug, PartialEq, scale::Decode, scale::Encode)]
     #[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
@@ -170,7 +169,7 @@ pub mod community {
         }
     }
 
-    #[derive(Debug, scale::Decode, scale::Encode)]
+    #[derive(Debug, Default, scale::Decode, scale::Encode)]
     #[cfg_attr(
         feature = "std",
         derive(scale_info::TypeInfo, ink::storage::traits::StorageLayout)
@@ -215,6 +214,7 @@ pub mod community {
             let mut instance = Self::default();
             ownable::Internal::_init_with_owner(&mut instance, Self::env().caller());
             instance.config.set(&CommunityConfig::new(treasury));
+            instance.store.set(&CommunityStore::default());
             instance
         }
 
@@ -277,7 +277,7 @@ pub mod community {
             Ok(())
         }
 
-        #[ink(message, payable)]
+        #[ink(message)]
         pub fn join_community(
             &mut self,
             user_data: String,
@@ -291,7 +291,7 @@ pub mod community {
             }
 
             let CommunityConfig {
-                treasury,
+                // treasury,
                 subscription_duration,
                 ..
             } = self.config.get().unwrap();
@@ -308,16 +308,16 @@ pub mod community {
             // update the store
             self.store.set(&store);
 
-            let _ = self
-                .env()
-                .transfer(treasury, self.env().transferred_value());
+            // let _ = self
+            //     .env()
+            //     .transfer(treasury, self.env().transferred_value());
 
             // Emit event
             self._emit_new_sign_up(sender, user_data.clone());
             Ok(())
         }
 
-        #[ink(message, payable)]
+        #[ink(message)]
         pub fn apply_for_nutritionist_role(
             &mut self,
             data_uri: String,
@@ -344,12 +344,12 @@ pub mod community {
                 )));
             }
 
-            let CommunityConfig { treasury, .. } = self.config.get().unwrap();
+            // let CommunityConfig { treasury, .. } = self.config.get().unwrap();
 
-            let nutritionist_application_fee = NUTRITIONIST_APPLICATION_FEE;
-            if self.env().transferred_value() < nutritionist_application_fee {
-                return Err(CommunityActionError::InsufficientPayment);
-            }
+            // let nutritionist_application_fee = NUTRITIONIST_APPLICATION_FEE;
+            // if self.env().transferred_value() < nutritionist_application_fee {
+            //     return Err(CommunityActionError::InsufficientPayment);
+            // }
 
             let application = NutritionistApplication {
                 data_uri: data_uri.clone(),
@@ -358,9 +358,9 @@ pub mod community {
             };
             store.nutritionist_applications.push(application);
 
-            let _ = self
-                .env()
-                .transfer(treasury, self.env().transferred_value());
+            // let _ = self
+            //     .env()
+            //     .transfer(treasury, self.env().transferred_value());
 
             // Emit event
             self._emit_new_application(sender, data_uri.clone());
