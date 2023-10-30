@@ -1,6 +1,6 @@
 {
   "source": {
-    "hash": "0x2bfeb3027efe6525e7aa3e920bf8dea17cb0cbb0a29c059c1960abea6945b2fa",
+    "hash": "0x34cc02338b93d4bd8fe3c358c2c7efd2826b0b6bcf722628f205fe05dc68ff42",
     "language": "ink! 4.3.0",
     "compiler": "rustc 1.72.0",
     "build_info": {
@@ -233,7 +233,7 @@
         "docs": [],
         "label": "join_community",
         "mutates": true,
-        "payable": true,
+        "payable": false,
         "returnType": {
           "displayName": [
             "ink",
@@ -259,7 +259,7 @@
         "docs": [],
         "label": "apply_for_nutritionist_role",
         "mutates": true,
-        "payable": true,
+        "payable": false,
         "returnType": {
           "displayName": [
             "ink",
@@ -542,22 +542,6 @@
         "selector": "0x5e228753"
       },
       {
-        "args": [],
-        "default": false,
-        "docs": [],
-        "label": "Ownable::owner",
-        "mutates": false,
-        "payable": false,
-        "returnType": {
-          "displayName": [
-            "ink",
-            "MessageResult"
-          ],
-          "type": 34
-        },
-        "selector": "0x4fa43c8c"
-      },
-      {
         "args": [
           {
             "label": "new_owner",
@@ -583,6 +567,22 @@
           "type": 31
         },
         "selector": "0x11f43efd"
+      },
+      {
+        "args": [],
+        "default": false,
+        "docs": [],
+        "label": "Ownable::owner",
+        "mutates": false,
+        "payable": false,
+        "returnType": {
+          "displayName": [
+            "ink",
+            "MessageResult"
+          ],
+          "type": 34
+        },
+        "selector": "0x4fa43c8c"
       }
     ]
   },

@@ -12,8 +12,7 @@ pub mod community {
     use openbrush::{modifiers, traits::Storage};
     use user_nft::user_nft::UserNFTRef;
 
-    pub const USER_APPLICATION_FEE: u128 = 10000000000000000;
-    pub const NUTRITIONIST_APPLICATION_FEE: u128 = 5000000000000000;
+    pub const NUTRITIONIST_APPLICATION_FEE: u128 = 0;
 
     #[derive(Clone, Debug, PartialEq, scale::Decode, scale::Encode)]
     #[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
@@ -170,7 +169,7 @@ pub mod community {
         }
     }
 
-    #[derive(Debug, scale::Decode, scale::Encode)]
+    #[derive(Debug, Default, scale::Decode, scale::Encode)]
     #[cfg_attr(
         feature = "std",
         derive(scale_info::TypeInfo, ink::storage::traits::StorageLayout)
@@ -215,6 +214,7 @@ pub mod community {
             let mut instance = Self::default();
             ownable::Internal::_init_with_owner(&mut instance, Self::env().caller());
             instance.config.set(&CommunityConfig::new(treasury));
+            instance.store.set(&CommunityStore::default());
             instance
         }
 
@@ -277,7 +277,7 @@ pub mod community {
             Ok(())
         }
 
-        #[ink(message, payable)]
+        #[ink(message)]
         pub fn join_community(
             &mut self,
             user_data: String,
@@ -317,7 +317,7 @@ pub mod community {
             Ok(())
         }
 
-        #[ink(message, payable)]
+        #[ink(message)]
         pub fn apply_for_nutritionist_role(
             &mut self,
             data_uri: String,
