@@ -8,10 +8,14 @@ import RegisterForm from '../register-form';
 import { useWallet, useAllWallets } from 'useink';
 import dynamic from 'next/dynamic';
 import { toast } from 'react-toastify';
+import { connectWalletProps } from '../connectWallet/connect.tsx';
 
-const ConnectWallet = dynamic(() => import('../connectWallet'), {
-  ssr: false,
-});
+const ConnectWallet = dynamic<connectWalletProps>(
+  () => import('../connectWallet/connect.tsx').then((module) => module.default),
+  {
+    ssr: false,
+  }
+);
 
 const Header = ({ bg = 'transparent' }: { bg?: string }) => {
   const { setAddress } = useAppContext();

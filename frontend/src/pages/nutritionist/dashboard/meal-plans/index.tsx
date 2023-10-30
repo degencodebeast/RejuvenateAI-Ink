@@ -19,7 +19,7 @@ import { format } from 'date-fns';
 export default function DashBoard() {
   const today = new Date().getTime();
   return (
-    <Box className='min-h-full h-full px-4 mt-6'>
+    <Box className='min-h-screen h-full bg-white px-4 mt-6'>
       <Flex align={'center'} justify={'space-between'}>
         <Flex align={'center'} gap={6}>
           <Heading size={'lg'} className='text-primaryGreen'>

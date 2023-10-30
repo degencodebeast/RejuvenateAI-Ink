@@ -2,11 +2,11 @@
 import React, { useEffect } from 'react';
 import { useWallet, useAllWallets } from 'useink';
 
-interface connectWalletProps {
-  wallets: any;
-  connect: any;
+export interface connectWalletProps {
+  wallets: any[];
+  connect: (walletName: string) => void;
 }
-const ConnectWallet = ({ wallets, connect }: connectWalletProps) => {
+const ConnectWallet = (props: connectWalletProps) => {
   return (
     <div className='modal'>
       <label className='modal-overlay' htmlFor='modal-two'></label>
@@ -21,12 +21,12 @@ const ConnectWallet = ({ wallets, connect }: connectWalletProps) => {
         <div className='w-full flex justify-between'>
           <li className='w-full list-none'>
             <ul className='flex flex-col md:flex-row justify-between items-center gap-5 px-5 w-full list-none pb-10'>
-              {wallets.map((w: any) => {
+              {props.wallets.map((w: any) => {
                 return (
                   <li key={w.title} className='flex flex-col items-center'>
                     {w?.installed ? (
                       <button
-                        onClick={() => connect(w.extensionName)}
+                        onClick={() => props.connect(w.extensionName)}
                         className='flex flex-col items-center gap-3'
                       >
                         <img
