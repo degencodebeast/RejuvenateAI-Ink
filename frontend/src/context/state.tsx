@@ -1,7 +1,5 @@
 'use client';
-import { env } from '@/config/environment';
-import { getDeployments } from '@/deployments/deployments';
-//import { UseInkathonProvider } from '@scio-labs/use-inkathon';
+// import { UseInkathonProvider } from '@scio-labs/use-inkathon';
 import { createContext, useContext, useState } from 'react';
 import { stateContextType } from '../types/state';
 
@@ -19,6 +17,13 @@ type StateContextProviderProps = {
 };
 
 const AppContext = createContext<stateContextType>(contextDefaultValue);
+
+export enum contractAddress {
+  Community = 'community',
+  Nutritionist = 'nutritionist',
+  User = 'user',
+  Treasury = 'treasury',
+}
 
 export function AppWrapper({ children }: StateContextProviderProps) {
   const [allTokensData, setAllTokenData] = useState<any>();

@@ -1,6 +1,6 @@
-import axios from 'axios'
+import axios from 'axios';
 
-import { NextResponse } from 'next/server'
+import { NextResponse } from 'next/server';
 
 export async function GET() {
   try {
@@ -15,14 +15,14 @@ export async function GET() {
           'Content-Type': 'application/json',
           'x-api-key': process.env.HUDDLE_API_KEY,
         },
-      },
-    )
-    return NextResponse.json(data, { status: 200 })
+      }
+    );
+    return NextResponse.json(data, { status: 200 });
     // res.status(200).json(data);
   } catch (error) {
-    console.log('API', { error })
+    console.log('API', { error });
 
-    return NextResponse.json(error, { status: 500 })
+    return NextResponse.json(error, { status: 500 });
   }
 }
 
