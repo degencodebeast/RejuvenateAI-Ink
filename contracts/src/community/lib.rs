@@ -291,7 +291,7 @@ pub mod community {
             }
 
             let CommunityConfig {
-                treasury,
+                // treasury,
                 subscription_duration,
                 ..
             } = self.config.get().unwrap();
@@ -308,9 +308,9 @@ pub mod community {
             // update the store
             self.store.set(&store);
 
-            let _ = self
-                .env()
-                .transfer(treasury, self.env().transferred_value());
+            // let _ = self
+            //     .env()
+            //     .transfer(treasury, self.env().transferred_value());
 
             // Emit event
             self._emit_new_sign_up(sender, user_data.clone());
@@ -344,12 +344,12 @@ pub mod community {
                 )));
             }
 
-            let CommunityConfig { treasury, .. } = self.config.get().unwrap();
+            // let CommunityConfig { treasury, .. } = self.config.get().unwrap();
 
-            let nutritionist_application_fee = NUTRITIONIST_APPLICATION_FEE;
-            if self.env().transferred_value() < nutritionist_application_fee {
-                return Err(CommunityActionError::InsufficientPayment);
-            }
+            // let nutritionist_application_fee = NUTRITIONIST_APPLICATION_FEE;
+            // if self.env().transferred_value() < nutritionist_application_fee {
+            //     return Err(CommunityActionError::InsufficientPayment);
+            // }
 
             let application = NutritionistApplication {
                 data_uri: data_uri.clone(),
@@ -358,9 +358,9 @@ pub mod community {
             };
             store.nutritionist_applications.push(application);
 
-            let _ = self
-                .env()
-                .transfer(treasury, self.env().transferred_value());
+            // let _ = self
+            //     .env()
+            //     .transfer(treasury, self.env().transferred_value());
 
             // Emit event
             self._emit_new_application(sender, data_uri.clone());
