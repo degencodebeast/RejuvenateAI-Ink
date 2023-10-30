@@ -1,6 +1,6 @@
 {
   "source": {
-    "hash": "0x262fde5a0cc8fa4769cdff22575242cad51691a8c153d9a02074beece815976d",
+    "hash": "0xab56119b455b62ae9ab0e40fcd64687645f67e6d397726758a0c3594102e243a",
     "language": "ink! 4.3.0",
     "compiler": "rustc 1.72.0",
     "build_info": {
@@ -220,7 +220,7 @@
             }
           },
           {
-            "label": "_nft_data",
+            "label": "nft_data",
             "type": {
               "displayName": [
                 "String"
@@ -233,7 +233,7 @@
         "docs": [],
         "label": "join_community",
         "mutates": true,
-        "payable": false,
+        "payable": true,
         "returnType": {
           "displayName": [
             "ink",
@@ -259,7 +259,7 @@
         "docs": [],
         "label": "apply_for_nutritionist_role",
         "mutates": true,
-        "payable": false,
+        "payable": true,
         "returnType": {
           "displayName": [
             "ink",
@@ -526,38 +526,6 @@
         "selector": "0x018584bf"
       },
       {
-        "args": [],
-        "default": false,
-        "docs": [],
-        "label": "Ownable::owner",
-        "mutates": false,
-        "payable": false,
-        "returnType": {
-          "displayName": [
-            "ink",
-            "MessageResult"
-          ],
-          "type": 31
-        },
-        "selector": "0x4fa43c8c"
-      },
-      {
-        "args": [],
-        "default": false,
-        "docs": [],
-        "label": "Ownable::renounce_ownership",
-        "mutates": true,
-        "payable": false,
-        "returnType": {
-          "displayName": [
-            "ink",
-            "MessageResult"
-          ],
-          "type": 32
-        },
-        "selector": "0x5e228753"
-      },
-      {
         "args": [
           {
             "label": "new_owner",
@@ -580,9 +548,41 @@
             "ink",
             "MessageResult"
           ],
-          "type": 32
+          "type": 31
         },
         "selector": "0x11f43efd"
+      },
+      {
+        "args": [],
+        "default": false,
+        "docs": [],
+        "label": "Ownable::renounce_ownership",
+        "mutates": true,
+        "payable": false,
+        "returnType": {
+          "displayName": [
+            "ink",
+            "MessageResult"
+          ],
+          "type": 31
+        },
+        "selector": "0x5e228753"
+      },
+      {
+        "args": [],
+        "default": false,
+        "docs": [],
+        "label": "Ownable::owner",
+        "mutates": false,
+        "payable": false,
+        "returnType": {
+          "displayName": [
+            "ink",
+            "MessageResult"
+          ],
+          "type": 34
+        },
+        "selector": "0x4fa43c8c"
       }
     ]
   },
@@ -1569,6 +1569,116 @@
               {
                 "fields": [
                   {
+                    "type": 32
+                  }
+                ],
+                "index": 0,
+                "name": "Ok"
+              },
+              {
+                "fields": [
+                  {
+                    "type": 25
+                  }
+                ],
+                "index": 1,
+                "name": "Err"
+              }
+            ]
+          }
+        },
+        "params": [
+          {
+            "name": "T",
+            "type": 32
+          },
+          {
+            "name": "E",
+            "type": 25
+          }
+        ],
+        "path": [
+          "Result"
+        ]
+      }
+    },
+    {
+      "id": 32,
+      "type": {
+        "def": {
+          "variant": {
+            "variants": [
+              {
+                "fields": [
+                  {
+                    "type": 24
+                  }
+                ],
+                "index": 0,
+                "name": "Ok"
+              },
+              {
+                "fields": [
+                  {
+                    "type": 33
+                  }
+                ],
+                "index": 1,
+                "name": "Err"
+              }
+            ]
+          }
+        },
+        "params": [
+          {
+            "name": "T",
+            "type": 24
+          },
+          {
+            "name": "E",
+            "type": 33
+          }
+        ],
+        "path": [
+          "Result"
+        ]
+      }
+    },
+    {
+      "id": 33,
+      "type": {
+        "def": {
+          "variant": {
+            "variants": [
+              {
+                "index": 0,
+                "name": "CallerIsNotOwner"
+              },
+              {
+                "index": 1,
+                "name": "NewOwnerIsNotSet"
+              }
+            ]
+          }
+        },
+        "path": [
+          "openbrush_contracts",
+          "traits",
+          "errors",
+          "ownable",
+          "OwnableError"
+        ]
+      }
+    },
+    {
+      "id": 34,
+      "type": {
+        "def": {
+          "variant": {
+            "variants": [
+              {
+                "fields": [
+                  {
                     "type": 19
                   }
                 ],
@@ -1599,116 +1709,6 @@
         ],
         "path": [
           "Result"
-        ]
-      }
-    },
-    {
-      "id": 32,
-      "type": {
-        "def": {
-          "variant": {
-            "variants": [
-              {
-                "fields": [
-                  {
-                    "type": 33
-                  }
-                ],
-                "index": 0,
-                "name": "Ok"
-              },
-              {
-                "fields": [
-                  {
-                    "type": 25
-                  }
-                ],
-                "index": 1,
-                "name": "Err"
-              }
-            ]
-          }
-        },
-        "params": [
-          {
-            "name": "T",
-            "type": 33
-          },
-          {
-            "name": "E",
-            "type": 25
-          }
-        ],
-        "path": [
-          "Result"
-        ]
-      }
-    },
-    {
-      "id": 33,
-      "type": {
-        "def": {
-          "variant": {
-            "variants": [
-              {
-                "fields": [
-                  {
-                    "type": 24
-                  }
-                ],
-                "index": 0,
-                "name": "Ok"
-              },
-              {
-                "fields": [
-                  {
-                    "type": 34
-                  }
-                ],
-                "index": 1,
-                "name": "Err"
-              }
-            ]
-          }
-        },
-        "params": [
-          {
-            "name": "T",
-            "type": 24
-          },
-          {
-            "name": "E",
-            "type": 34
-          }
-        ],
-        "path": [
-          "Result"
-        ]
-      }
-    },
-    {
-      "id": 34,
-      "type": {
-        "def": {
-          "variant": {
-            "variants": [
-              {
-                "index": 0,
-                "name": "CallerIsNotOwner"
-              },
-              {
-                "index": 1,
-                "name": "NewOwnerIsNotSet"
-              }
-            ]
-          }
-        },
-        "path": [
-          "openbrush_contracts",
-          "traits",
-          "errors",
-          "ownable",
-          "OwnableError"
         ]
       }
     },
