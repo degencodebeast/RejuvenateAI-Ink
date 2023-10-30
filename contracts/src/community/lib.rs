@@ -42,6 +42,7 @@ pub mod community {
         InsufficientPayment,
         InvalidSubStatus,
         OnlyOwner,
+        ApplicationNotFound,
         UnauthorizedApplication(String),
     }
 
@@ -86,16 +87,16 @@ pub mod community {
     #[derive(Clone, Debug, scale::Decode, scale::Encode)]
     #[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
     pub struct User {
-        address: Option<AccountId>,
+        account_id: Option<AccountId>,
         data: String, //needs to be encrypted before storing
         sub_status: UserSubscriptionStatus,
         sub_deadline: u128,
     }
 
     impl User {
-        pub fn new(address: Option<AccountId>, data: String) -> Self {
+        pub fn new(account_id: Option<AccountId>, data: String) -> Self {
             User {
-                address,
+                account_id,
                 data,
                 sub_status: UserSubscriptionStatus::Active,
                 sub_deadline: 0,
@@ -112,7 +113,7 @@ pub mod community {
     #[derive(Clone, Debug, scale::Decode, scale::Encode)]
     #[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
     pub struct Nutritionist {
-        address: AccountId,
+        account_id: AccountId,
         data: String, //needs to be encrypted before storing
         meal_plans: Vec<MealPlan>,
         fitness_plans: Vec<FitnessPlan>,
@@ -122,9 +123,9 @@ pub mod community {
     }
 
     impl Nutritionist {
-        pub fn new(address: AccountId, data: String) -> Self {
+        pub fn new(account_id: AccountId, data: String) -> Self {
             Nutritionist {
-                address,
+                account_id,
                 data,
                 meal_plans: Vec::new(),
                 fitness_plans: Vec::new(),
@@ -139,7 +140,7 @@ pub mod community {
     #[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
     struct NutritionistApplication {
         data_uri: String,
-        address: AccountId,
+        account_id: AccountId,
         status: NutritionistApplicationStatus,
     }
 
@@ -286,7 +287,7 @@ pub mod community {
             let sender = self.env().caller();
             let mut store = self.store.get().unwrap();
 
-            if store.nutritionists.iter().any(|n| n.address == sender) {
+            if store.nutritionists.iter().any(|n| n.account_id == sender) {
                 return Err(CommunityActionError::AlreadyAMember);
             }
 
@@ -325,14 +326,14 @@ pub mod community {
             let sender = self.env().caller();
             let mut store = self.store.get().unwrap();
 
-            if store.nutritionists.iter().any(|n| n.address == sender) {
+            if store.nutritionists.iter().any(|n| n.account_id == sender) {
                 return Err(CommunityActionError::AlreadyANutritionist);
             }
 
             let applicant_status = store
                 .nutritionist_applications
                 .iter()
-                .find(|n| n.address == sender)
+                .find(|n| n.account_id == sender)
                 .map(|n| &n.status)
                 .unwrap_or(&NutritionistApplicationStatus::NotApplied);
 
@@ -353,7 +354,7 @@ pub mod community {
 
             let application = NutritionistApplication {
                 data_uri: data_uri.clone(),
-                address: sender,
+                account_id: sender,
                 status: applicant_status.clone(),
             };
             store.nutritionist_applications.push(application);
@@ -372,14 +373,14 @@ pub mod community {
             let sender = self.env().caller();
             let mut store = self.store.get().unwrap();
 
-            if store.nutritionists.iter().any(|n| n.address == sender) {
+            if store.nutritionists.iter().any(|n| n.account_id == sender) {
                 return Err(CommunityActionError::AlreadyANutritionist);
             }
 
             if let Some(application) = store
                 .nutritionist_applications
                 .iter_mut()
-                .find(|n| n.address == sender)
+                .find(|n| n.account_id == sender)
             {
                 application.status = NutritionistApplicationStatus::Canceled;
             }
@@ -397,15 +398,19 @@ pub mod community {
         ) -> Result<(), CommunityActionError> {
             let mut store = self.store.get().unwrap();
 
-            if store.nutritionists.iter().any(|n| n.address == applicant) {
+            if store
+                .nutritionists
+                .iter()
+                .any(|n| n.account_id == applicant)
+            {
                 return Err(CommunityActionError::AlreadyANutritionist);
             }
 
             let data_uri = store
                 .nutritionist_applications
                 .iter()
-                .find(|n| n.address == applicant)
-                .unwrap()
+                .find(|n| n.account_id == applicant)
+                .ok_or(CommunityActionError::ApplicationNotFound)?
                 .data_uri
                 .clone();
 
@@ -428,14 +433,18 @@ pub mod community {
         ) -> Result<(), CommunityActionError> {
             let mut store = self.store.get().unwrap();
 
-            if store.nutritionists.iter().any(|n| n.address == applicant) {
+            if store
+                .nutritionists
+                .iter()
+                .any(|n| n.account_id == applicant)
+            {
                 return Err(CommunityActionError::AlreadyANutritionist);
             }
 
             if let Some(nutritionist) = store
                 .nutritionists
                 .iter_mut()
-                .find(|n| n.address == applicant)
+                .find(|n| n.account_id == applicant)
             {
                 nutritionist.status = NutritionistApplicationStatus::Rejected;
             }
@@ -453,7 +462,7 @@ pub mod community {
             if let Some(user) = store
                 .users
                 .iter_mut()
-                .find(|u| u.address.unwrap() == sender)
+                .find(|u| u.account_id.unwrap() == sender)
             {
                 if user.sub_status != UserSubscriptionStatus::Expired {
                     return Err(CommunityActionError::InvalidSubStatus);
@@ -473,7 +482,7 @@ pub mod community {
             if let Some(nutritionist) = store
                 .nutritionists
                 .iter_mut()
-                .find(|n| n.address == creator)
+                .find(|n| n.account_id == creator)
             {
                 let meal_plan = MealPlan {
                     name: meal_name,
@@ -494,7 +503,7 @@ pub mod community {
             if let Some(nutritionist) = store
                 .nutritionists
                 .iter_mut()
-                .find(|n| n.address == creator)
+                .find(|n| n.account_id == creator)
             {
                 let fitness_plan = FitnessPlan {
                     name: fitness_name,
@@ -514,7 +523,7 @@ pub mod community {
             if let Some(nutritionist) = store
                 .nutritionists
                 .iter_mut()
-                .find(|n| n.address == consultant)
+                .find(|n| n.account_id == consultant)
             {
                 let service = ConsultationService {
                     consultant,
@@ -533,7 +542,7 @@ pub mod community {
             if let Some(nutritionist) = store
                 .nutritionists
                 .iter_mut()
-                .find(|n| n.address == publisher)
+                .find(|n| n.account_id == publisher)
             {
                 let article = Article {
                     title,

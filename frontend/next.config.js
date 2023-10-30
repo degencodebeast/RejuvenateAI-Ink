@@ -14,7 +14,17 @@
 
 /** @type {import('next').NextConfig} */
 
-// const nextConfig = {}
+const nextConfig = {
+  transpilePackages: [
+    // Fix for warnings about cjs/esm package duplication
+    // See: https://github.com/polkadot-js/api/issues/5636
+    '**@polkadot/**',
+  ],
+  output: 'export',
+  images: {
+    unoptimized: true, // Add this line to disable image optimization
+  },
+};
 module.exports = {
   webpack(config) {
     config.module.rules.push({
@@ -25,5 +35,5 @@ module.exports = {
 
     return config;
   },
-  // {...nextConfig},
+  ...nextConfig,
 };
