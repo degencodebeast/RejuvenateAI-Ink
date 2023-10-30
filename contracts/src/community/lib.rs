@@ -7,12 +7,10 @@ pub mod community {
         prelude::{string::String, vec::Vec},
         storage::Lazy,
     };
-    use nutritionist_nft::NutritionistNFTRef;
-    use openbrush::contracts::{
-        ownable::OwnableError,
-        psp34::{extensions::mintable::psp34mintable_external::PSP34Mintable, Id},
-    };
+    use nutritionist_nft::nutritionist_nft::NutritionistNFTRef;
+    use openbrush::contracts::ownable::OwnableError;
     use openbrush::{modifiers, traits::Storage};
+    use user_nft::user_nft::UserNFTRef;
 
     pub const USER_APPLICATION_FEE: u128 = 10000000000000000;
     pub const NUTRITIONIST_APPLICATION_FEE: u128 = 5000000000000000;
@@ -141,7 +139,6 @@ pub mod community {
         // configs
         treasury: AccountId,
         subscription_duration: u128,
-        lilypad_fee: u128,
 
         // hashes
         nutritionist_nft_hash: Option<Hash>,
@@ -152,7 +149,6 @@ pub mod community {
         pub fn new(treasury: AccountId) -> Self {
             CommunityConfig {
                 treasury,
-                lilypad_fee: 2,
                 subscription_duration: 2592000,
                 nutritionist_nft_hash: None,
                 user_nft_hash: None,
@@ -189,12 +185,6 @@ pub mod community {
         applicant: AccountId,
     }
 
-    #[ink(event)]
-    pub struct ReceivedJobResults {
-        job_id: u128,
-        cid: String,
-    }
-
     #[ink(storage)]
     #[derive(Default, Storage)]
     pub struct Community {
@@ -229,28 +219,24 @@ pub mod community {
             self.env().emit_event(ApplicationApproved { applicant });
         }
 
-        fn _emit_received_job_results(&self, job_id: u128, cid: String) {
-            self.env().emit_event(ReceivedJobResults { job_id, cid });
-        }
-
-        fn _mint_nutritionist_nft(&self, user: AccountId, nft_id: Id) {
+        fn _mint_nutritionist_nft(&self, user: AccountId) {
             let nutritionist_nft_hash = self.config.get().unwrap().nutritionist_nft_hash;
             let mut nutritionist_nft = NutritionistNFTRef::new()
                 .code_hash(nutritionist_nft_hash.unwrap())
                 .endowment(0)
                 .salt_bytes([0xDE, 0xAD, 0xBE, 0xEF])
                 .instantiate();
-            let _ = nutritionist_nft.mint(user, nft_id);
+            let _ = nutritionist_nft.mint(user);
         }
 
-        fn _mint_user_nft(&self, user: AccountId, nft_id: Id) {
+        fn _mint_user_nft(&self, user: AccountId) {
             let user_nft_hash = self.config.get().unwrap().user_nft_hash;
-            let mut user_nft = NutritionistNFTRef::new()
+            let mut user_nft = UserNFTRef::new()
                 .code_hash(user_nft_hash.unwrap())
                 .endowment(0)
                 .salt_bytes([0xDE, 0xAD, 0xBE, 0xEF])
                 .instantiate();
-            let _ = user_nft.mint(user, nft_id);
+            let _ = user_nft.mint(user);
         }
 
         #[ink(message)]
@@ -271,7 +257,7 @@ pub mod community {
         pub fn join_community(
             &mut self,
             user_data: String,
-            nft_id: Id,
+            _nft_data: String,
         ) -> Result<(), CommunityActionError> {
             let sender = self.env().caller();
             let mut store = self.store.get().unwrap();
@@ -282,20 +268,15 @@ pub mod community {
 
             let CommunityConfig {
                 treasury,
-                lilypad_fee,
                 subscription_duration,
                 ..
             } = self.config.get().unwrap();
-
-            if self.env().transferred_value() < lilypad_fee {
-                return Err(CommunityActionError::InsufficientPayment);
-            }
 
             let mut user = User::new(Some(sender), user_data.clone());
             user.sub_deadline = (self.env().block_timestamp() as u128) + subscription_duration;
 
             // mint nft
-            self._mint_user_nft(sender, nft_id);
+            self._mint_user_nft(sender);
 
             // save the user
             store.users.push(user);
@@ -380,6 +361,34 @@ pub mod community {
             }
 
             self.store.set(&store);
+
+            Ok(())
+        }
+
+        #[ink(message)]
+        #[modifiers(only_owner)]
+        pub fn approve_nutritionist_role(
+            &mut self,
+            applicant: AccountId,
+        ) -> Result<(), CommunityActionError> {
+            let mut store = self.store.get().unwrap();
+
+            if store.nutritionists.iter().any(|n| n.address == applicant) {
+                return Err(CommunityActionError::AlreadyANutritionist);
+            }
+
+            if let Some(nutritionist) = store
+                .nutritionists
+                .iter_mut()
+                .find(|n| n.address == applicant)
+            {
+                nutritionist.status = NutritionistApplicationStatus::Accepted;
+            }
+
+            self.store.set(&store);
+
+            self._mint_nutritionist_nft(applicant);
+            self._emit_application_approved(applicant);
 
             Ok(())
         }

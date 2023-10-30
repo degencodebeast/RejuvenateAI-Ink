@@ -1,9 +1,10 @@
 #![cfg_attr(not(feature = "std"), no_std, no_main)]
 
-#[openbrush::implementation(Ownable, PSP34, PSP34Burnable, PSP34Mintable, PSP34Metadata)]
+#[openbrush::implementation(Ownable, PSP34, PSP34Burnable)]
 #[openbrush::contract]
 pub mod nutritionist_nft {
-    use openbrush::{contracts::psp34::PSP34Error, modifiers, traits::Storage};
+    use ink::prelude::string::String;
+    use openbrush::{modifiers, traits::Storage};
 
     #[ink(storage)]
     #[derive(Default, Storage)]
@@ -11,12 +12,11 @@ pub mod nutritionist_nft {
         #[storage_field]
         psp34: psp34::Data,
         #[storage_field]
-        metadata: metadata::Data,
-        #[storage_field]
         ownable: ownable::Data,
+        next_id: u8,
     }
 
-    #[overrider(psp34::Internal)] // we want to override psp22::Internal::_before_token_transfer method
+    #[overrider(psp34::Internal)] // we want to override psp34::Internal::_before_token_transfer method
     fn _before_token_transfer(
         &mut self,
         from: Option<&AccountId>,
@@ -32,32 +32,18 @@ pub mod nutritionist_nft {
     #[modifiers(only_owner)]
     fn burn(&mut self) {}
 
-    #[default_impl(PSP34Mintable)]
-    #[modifiers(only_owner)]
-    fn mint(&mut self) {}
-
     impl NutritionistNFT {
         #[ink(constructor)]
         pub fn new() -> Self {
-            let mut _instance = Self::default();
-            psp34::Internal::_mint_to(&mut _instance, Self::env().caller(), Id::U8(1))
-                .expect("Can mint");
-            let collection_id = PSP34::collection_id(&_instance);
-            metadata::Internal::_set_attribute(
-                &mut _instance,
-                collection_id.clone(),
-                String::from("name"),
-                String::from("NutritionistNFT"),
-            );
-            metadata::Internal::_set_attribute(
-                &mut _instance,
-                collection_id,
-                String::from("symbol"),
-                String::from("NutritionistNFT"),
-            );
-            _instance
+            Self::default()
+        }
+
+        #[ink(message)]
+        #[modifiers(only_owner)]
+        pub fn mint(&mut self, user: AccountId) -> Result<(), PSP34Error> {
+            psp34::Internal::_mint_to(self, user, Id::U8(self.next_id))?;
+            self.next_id += 1;
+            Ok(())
         }
     }
 }
-
-pub use nutritionist_nft::*;
