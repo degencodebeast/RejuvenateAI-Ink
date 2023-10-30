@@ -5,7 +5,9 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as Yup from 'yup';
-import { uploadPromptToIpfs } from '@/helpers/prompt';
+//import { putJSONandGetHash } from '@/helpers/prompt';
+import { putJSONandGetHash } from '@/helpers/prompt';
+import { toast } from 'react-toastify';
 
 const RegisterForm = () => {
   //const auth = useAuth()
@@ -35,8 +37,21 @@ const RegisterForm = () => {
   const { errors } = formState;
 
   const onSubmit = async (data: any) => {
-    //    const cid = await uploadPromptToIpfs(data);
-    router.push('/member/dashboard');
+    try {
+      const userDataCid = await putJSONandGetHash(data);
+      const nftObject = {
+        name: `${data?.fullName}`,
+        imageUrl:
+          'https://ipfs.io/ipfs/bafkreihfweuclvhaozl7q6zsjjyrkh262vlbzqyd5m3lijrnjefh6pxy3i',
+        description: 'User NFT',
+      };
+      const nftURI = await putJSONandGetHash(nftObject);
+      console.log(userDataCid, nftURI);
+      toast.success('Sign up successful');
+      // router.push('/member/dashboard');
+    } catch {
+      toast.error('Error signing up');
+    }
   };
 
   return (

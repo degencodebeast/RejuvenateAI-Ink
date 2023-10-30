@@ -1,6 +1,6 @@
-'use client'
-import { Link } from '@chakra-ui/next-js'
-import RejuvenateAi from '../../images/svg/rejuvenate-logo.svg'
+'use client';
+import { Link } from '@chakra-ui/next-js';
+import RejuvenateAi from '../../images/svg/rejuvenate-logo.svg';
 
 const Header = ({ bg = 'transparent' }: { bg?: string }) => {
   return (
@@ -13,7 +13,7 @@ const Header = ({ bg = 'transparent' }: { bg?: string }) => {
         </Link>
       </div>
     </section>
-  )
-}
+  );
+};
 
-export default Header
+export default Header;

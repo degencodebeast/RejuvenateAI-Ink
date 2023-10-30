@@ -1,5 +1,5 @@
-import { env } from '@/config/environment'
-import { SubstrateDeployment } from '@scio-labs/use-inkathon'
+import { env } from '@/config/environment';
+import { SubstrateDeployment } from '@scio-labs/use-inkathon';
 
 /**
  * Add or change your custom contract ids here
@@ -10,19 +10,21 @@ export enum ContractIds {
 }
 
 export const getDeployments = async (): Promise<SubstrateDeployment[]> => {
-  const networks = env.supportedChains
-  const deployments: SubstrateDeployment[] = []
+  const networks = env.supportedChains;
+  const deployments: SubstrateDeployment[] = [];
 
   for (const networkId of networks) {
     for (const contractId of Object.values(ContractIds)) {
-      const abi = await import(`@inkathon/contracts/deployments/${contractId}/${contractId}.json`)
+      const abi = await import(
+        `@inkathon/contracts/deployments/${contractId}/${contractId}.json`
+      );
       const { address } = await import(
         `@inkathon/contracts/deployments/${contractId}/${networkId}.ts`
-      )
+      );
 
-      deployments.push({ contractId, networkId, abi, address })
+      deployments.push({ contractId, networkId, abi, address });
     }
   }
 
-  return deployments
-}
+  return deployments;
+};

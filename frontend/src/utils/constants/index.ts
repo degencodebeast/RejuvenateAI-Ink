@@ -1,1 +1,1 @@
-export const appName = 'REJUVENATE_AI'
+export const appName = 'REJUVENATE_AI';

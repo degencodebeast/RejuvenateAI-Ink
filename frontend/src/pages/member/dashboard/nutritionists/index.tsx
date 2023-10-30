@@ -1,8 +1,8 @@
-'use client'
+'use client';
 
-import Icon from '@/components/Icon'
-import DashboardSideBar from '@/components/dashboard-sidebar'
-import { Link } from '@chakra-ui/next-js'
+import Icon from '@/components/Icon';
+import DashboardSideBar from '@/components/dashboard-sidebar';
+import { Link } from '@chakra-ui/next-js';
 import {
   Td,
   Box,
@@ -17,19 +17,19 @@ import {
   Thead,
   Tr,
   Avatar,
-} from '@chakra-ui/react'
-import { format } from 'date-fns'
+} from '@chakra-ui/react';
+import { format } from 'date-fns';
 export default function DashBoard() {
-  const today = new Date().getTime()
+  const today = new Date().getTime();
   return (
-    <Box className="min-h-full h-full px-4 mt-6">
+    <Box className='min-h-full h-full px-4 mt-6'>
       <Flex align={'center'} justify={'space-between'}>
         <Flex align={'center'} gap={6}>
-          <Heading size={'lg'} className="text-primaryGreen">
+          <Heading size={'lg'} className='text-primaryGreen'>
             Today&apos;s Appointments
           </Heading>{' '}
           <Text
-            className="bg-primaryGreen text-white rounded-full py-1 px-4 "
+            className='bg-primaryGreen text-white rounded-full py-1 px-4 '
             fontSize={'sm'}
             fontWeight={'semibold'}
           >
@@ -41,7 +41,7 @@ export default function DashBoard() {
 
       <TableContainer my={6}>
         <Table>
-          <Thead bg={'white'} className="mb-4">
+          <Thead bg={'white'} className='mb-4'>
             <Tr>
               <Th>Name</Th>
               <Th>Time</Th>
@@ -54,7 +54,11 @@ export default function DashBoard() {
               <Td>
                 {' '}
                 <Flex align={'center'} gap={3}>
-                  <Avatar size={'sm'} rounded={'md'} src="/images/user-59.jpg" />{' '}
+                  <Avatar
+                    size={'sm'}
+                    rounded={'md'}
+                    src='/images/user-59.jpg'
+                  />{' '}
                   <Text as={'span'} fontWeight={'semibold'}>
                     Lilian James
                   </Text>
@@ -68,15 +72,15 @@ export default function DashBoard() {
                     size={'sm'}
                     rounded={'full'}
                     gap={2}
-                    className="hover:bg-primaryYellow hover:text-primaryGreen text-primaryBeige bg-primaryGreen"
+                    className='hover:bg-primaryYellow hover:text-primaryGreen text-primaryBeige bg-primaryGreen'
                   >
-                    <Icon size={20} name="phone" /> Start Call
+                    <Icon size={20} name='phone' /> Start Call
                   </Button>
                   <Button
                     size={'sm'}
                     variant={'outline'}
                     rounded={'full'}
-                    className="text-primaryGreen"
+                    className='text-primaryGreen'
                   >
                     View Details
                   </Button>
@@ -86,7 +90,11 @@ export default function DashBoard() {
             <Tr bg={'white'} rounded={'md'} my={4}>
               <Td>
                 <Flex align={'center'} gap={3}>
-                  <Avatar size={'sm'} rounded={'md'} src="/images/user-53.jpg" />
+                  <Avatar
+                    size={'sm'}
+                    rounded={'md'}
+                    src='/images/user-53.jpg'
+                  />
                   <Text as={'span'} fontWeight={'semibold'}>
                     Chris Eze
                   </Text>
@@ -100,15 +108,15 @@ export default function DashBoard() {
                     size={'sm'}
                     rounded={'full'}
                     gap={2}
-                    className="hover:bg-primaryYellow hover:text-primaryGreen text-primaryBeige bg-primaryGreen"
+                    className='hover:bg-primaryYellow hover:text-primaryGreen text-primaryBeige bg-primaryGreen'
                   >
-                    <Icon size={20} name="phone" /> Start Call
+                    <Icon size={20} name='phone' /> Start Call
                   </Button>
                   <Button
                     size={'sm'}
                     variant={'outline'}
                     rounded={'full'}
-                    className="text-primaryGreen"
+                    className='text-primaryGreen'
                   >
                     View Details
                   </Button>
@@ -120,12 +128,22 @@ export default function DashBoard() {
       </TableContainer>
 
       <Box my={6}>
-        <Heading size={'lg'} className="text-primaryGreen">
+        <Heading size={'lg'} className='text-primaryGreen'>
           Upcoming Appointments
         </Heading>
-        <Flex bg={'white'} minH={220} align={'center'} justify={'center'} mt={4}>
+        <Flex
+          bg={'white'}
+          minH={220}
+          align={'center'}
+          justify={'center'}
+          mt={4}
+        >
           <Flex direction={'column'}>
-            <Text fontSize={18} className="text-secondaryGray" fontWeight={'semibold'}>
+            <Text
+              fontSize={18}
+              className='text-secondaryGray'
+              fontWeight={'semibold'}
+            >
               No upcoming appointments
             </Text>
             <Button
@@ -133,7 +151,7 @@ export default function DashBoard() {
               href={'/nutritionists'}
               mt={6}
               size={'lg'}
-              className="bg-primaryGreen text-primaryBeige hover:text-primaryGreen hover:bg-primaryYellow"
+              className='bg-primaryGreen text-primaryBeige hover:text-primaryGreen hover:bg-primaryYellow'
             >
               Book a Nutritionist
             </Button>
@@ -141,5 +159,5 @@ export default function DashBoard() {
         </Flex>
       </Box>
     </Box>
-  )
+  );
 }

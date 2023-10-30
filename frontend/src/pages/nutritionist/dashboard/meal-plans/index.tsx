@@ -1,6 +1,6 @@
-'use client'
+'use client';
 
-import DashboardSideBar from '@/components/dashboard-sidebar'
+import DashboardSideBar from '@/components/dashboard-sidebar';
 import {
   Td,
   Box,
@@ -14,33 +14,33 @@ import {
   Th,
   Thead,
   Tr,
-} from '@chakra-ui/react'
-import { format } from 'date-fns'
+} from '@chakra-ui/react';
+import { format } from 'date-fns';
 export default function DashBoard() {
-  const today = new Date().getTime()
+  const today = new Date().getTime();
   return (
-    <Box className="min-h-full h-full px-4 mt-6">
+    <Box className='min-h-full h-full px-4 mt-6'>
       <Flex align={'center'} justify={'space-between'}>
         <Flex align={'center'} gap={6}>
-          <Heading size={'lg'} className="text-primaryGreen">
+          <Heading size={'lg'} className='text-primaryGreen'>
             Meal Plans
           </Heading>{' '}
           <Text
-            className="bg-primaryGreen text-white rounded-full py-1 px-4 "
+            className='bg-primaryGreen text-white rounded-full py-1 px-4 '
             fontSize={'sm'}
             fontWeight={'semibold'}
           >
             {format(today, 'E, d MMM yyyy')}
           </Text>
         </Flex>
-        <Button className="bg-primaryGreen text-primaryBeige hover:bg-primaryYellowTrans hover:text-primaryGreen">
+        <Button className='bg-primaryGreen text-primaryBeige hover:bg-primaryYellowTrans hover:text-primaryGreen'>
           Create Meal Plan
         </Button>
       </Flex>
 
       <TableContainer my={6}>
         <Table>
-          <Thead bg={'white'} className="mb-4">
+          <Thead bg={'white'} className='mb-4'>
             <Tr>
               <Th>Time</Th>
               <Th>Meal Name</Th>
@@ -61,7 +61,7 @@ export default function DashBoard() {
                     size={'sm'}
                     variant={'outline'}
                     rounded={'full'}
-                    className="text-primaryGreen"
+                    className='text-primaryGreen border-primaryGreen'
                   >
                     View
                   </Button>
@@ -69,7 +69,7 @@ export default function DashBoard() {
                     size={'sm'}
                     variant={'outline'}
                     rounded={'full'}
-                    className="text-primaryGreen"
+                    className='text-primaryGreen'
                   >
                     Edit
                   </Button>
@@ -88,7 +88,7 @@ export default function DashBoard() {
                     size={'sm'}
                     variant={'outline'}
                     rounded={'full'}
-                    className="text-primaryGreen"
+                    className='text-primaryGreen'
                   >
                     View
                   </Button>
@@ -96,7 +96,7 @@ export default function DashBoard() {
                     size={'sm'}
                     variant={'outline'}
                     rounded={'full'}
-                    className="text-primaryGreen"
+                    className='text-primaryGreen'
                   >
                     Edit
                   </Button>
@@ -107,5 +107,5 @@ export default function DashBoard() {
         </Table>
       </TableContainer>
     </Box>
-  )
+  );
 }
