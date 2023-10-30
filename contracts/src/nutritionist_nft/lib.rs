@@ -19,18 +19,6 @@ pub mod nutritionist_nft {
         next_id: u8,
     }
 
-    #[overrider(psp34::Internal)] // we want to override psp34::Internal::_before_token_transfer method
-    fn _before_token_transfer(
-        &mut self,
-        from: Option<&AccountId>,
-        _to: Option<&AccountId>,
-        _amount: &Balance,
-    ) -> Result<(), PSP34Error> {
-        Err(PSP34Error::SafeTransferCheckFailed(String::from(
-            "NFT is SoulBound",
-        )))
-    }
-
     #[default_impl(PSP34Burnable)]
     #[modifiers(only_owner)]
     fn burn(&mut self) {}
@@ -81,6 +69,17 @@ pub mod nutritionist_nft {
             self._set_token_uri(id, uri);
             self.next_id += 1;
             Ok(())
+        }
+
+        pub fn transfer(
+            &mut self,
+            _from: Option<&AccountId>,
+            _to: Option<&AccountId>,
+            _amount: &Balance,
+        ) -> Result<(), PSP34Error> {
+            Err(PSP34Error::SafeTransferCheckFailed(String::from(
+                "NFT is SoulBound",
+            )))
         }
     }
 }
