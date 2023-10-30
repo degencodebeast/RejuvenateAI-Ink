@@ -13,21 +13,21 @@ export default function CustomHuddle({}) {
   const { initialize, isInitialized } = useHuddle01();
   const { joinLobby } = useLobby();
 
-  useEffect(() => {
-    // its preferable to use env vars to store projectId
-    initialize(PROJECT_ID);
-  }, [PROJECT_ID, initialize]);
-  const createRoom = async () => {
-    try {
-      const { data } = await axios.get('/api/create-room');
-      console.log('huddle:', { data });
-      if (joinLobby.isCallable) {
-        joinLobby(data?.data?.roomId);
-      }
-    } catch (err) {
-      console.log('error client:', { err });
-    }
-  };
+  // useEffect(() => {
+  //   // its preferable to use env vars to store projectId
+  //   initialize(PROJECT_ID);
+  // }, [PROJECT_ID, initialize]);
+  // const createRoom = async () => {
+  //   try {
+  //     const { data } = await axios.get('/api/create-room');
+  //     console.log('huddle:', { data });
+  //     if (joinLobby.isCallable) {
+  //       joinLobby(data?.data?.roomId);
+  //     }
+  //   } catch (err) {
+  //     console.log('error client:', { err });
+  //   }
+  // };
 
   return (
     <Button
