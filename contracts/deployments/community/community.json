@@ -1,6 +1,6 @@
 {
   "source": {
-    "hash": "0x262fde5a0cc8fa4769cdff22575242cad51691a8c153d9a02074beece815976d",
+    "hash": "0x15187da0f97797a8e5c6c38307c8d1fa4cef4a0af10f5c3bbfc0ed3600ff7108",
     "language": "ink! 4.3.0",
     "compiler": "rustc 1.72.0",
     "build_info": {
@@ -220,7 +220,7 @@
             }
           },
           {
-            "label": "_nft_data",
+            "label": "nft_data",
             "type": {
               "displayName": [
                 "String"

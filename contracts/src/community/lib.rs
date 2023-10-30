@@ -8,12 +8,11 @@ pub mod community {
         storage::Lazy,
     };
     use nutritionist_nft::nutritionist_nft::NutritionistNFTRef;
-    use openbrush::contracts::ownable::OwnableError;
+    use openbrush::contracts::{ownable::OwnableError, psp34::Id};
     use openbrush::{modifiers, traits::Storage};
     use user_nft::user_nft::UserNFTRef;
 
-    pub const USER_APPLICATION_FEE: u128 = 10000000000000000;
-    pub const NUTRITIONIST_APPLICATION_FEE: u128 = 5000000000000000;
+    pub const NUTRITIONIST_APPLICATION_FEE: u128 = 0;
 
     #[derive(Clone, Debug, PartialEq, scale::Decode, scale::Encode)]
     #[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
@@ -122,6 +121,20 @@ pub mod community {
         status: NutritionistApplicationStatus,
     }
 
+    impl Nutritionist {
+        pub fn new(address: AccountId, data: String) -> Self {
+            Nutritionist {
+                address,
+                data,
+                meal_plans: Vec::new(),
+                fitness_plans: Vec::new(),
+                services: Vec::new(),
+                articles: Vec::new(),
+                status: NutritionistApplicationStatus::Accepted,
+            }
+        }
+    }
+
     #[derive(Clone, Debug, scale::Decode, scale::Encode)]
     #[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
     struct NutritionistApplication {
@@ -156,7 +169,7 @@ pub mod community {
         }
     }
 
-    #[derive(Debug, scale::Decode, scale::Encode)]
+    #[derive(Debug, Default, scale::Decode, scale::Encode)]
     #[cfg_attr(
         feature = "std",
         derive(scale_info::TypeInfo, ink::storage::traits::StorageLayout)
@@ -201,6 +214,7 @@ pub mod community {
             let mut instance = Self::default();
             ownable::Internal::_init_with_owner(&mut instance, Self::env().caller());
             instance.config.set(&CommunityConfig::new(treasury));
+            instance.store.set(&CommunityStore::default());
             instance
         }
 
@@ -219,24 +233,34 @@ pub mod community {
             self.env().emit_event(ApplicationApproved { applicant });
         }
 
-        fn _mint_nutritionist_nft(&self, user: AccountId) {
+        fn _mint_nutritionist_nft(&self, user: AccountId, uri: String) {
             let nutritionist_nft_hash = self.config.get().unwrap().nutritionist_nft_hash;
-            let mut nutritionist_nft = NutritionistNFTRef::new()
-                .code_hash(nutritionist_nft_hash.unwrap())
-                .endowment(0)
-                .salt_bytes([0xDE, 0xAD, 0xBE, 0xEF])
-                .instantiate();
-            let _ = nutritionist_nft.mint(user);
+            let mut nutritionist_nft = NutritionistNFTRef::new(
+                Id::U8(0),
+                String::from("NutritionistNFT"),
+                String::from("NNFT"),
+                self.env().account_id(),
+            )
+            .code_hash(nutritionist_nft_hash.unwrap())
+            .endowment(0)
+            .salt_bytes([0xDE, 0xAD, 0xBE, 0xEF])
+            .instantiate();
+            let _ = nutritionist_nft.mint(user, uri);
         }
 
-        fn _mint_user_nft(&self, user: AccountId) {
+        fn _mint_user_nft(&self, user: AccountId, uri: String) {
             let user_nft_hash = self.config.get().unwrap().user_nft_hash;
-            let mut user_nft = UserNFTRef::new()
-                .code_hash(user_nft_hash.unwrap())
-                .endowment(0)
-                .salt_bytes([0xDE, 0xAD, 0xBE, 0xEF])
-                .instantiate();
-            let _ = user_nft.mint(user);
+            let mut user_nft = UserNFTRef::new(
+                Id::U8(0),
+                String::from("UserNFT"),
+                String::from("UNFT"),
+                self.env().account_id(),
+            )
+            .code_hash(user_nft_hash.unwrap())
+            .endowment(0)
+            .salt_bytes([0xDE, 0xAD, 0xBE, 0xEF])
+            .instantiate();
+            let _ = user_nft.mint(user, uri);
         }
 
         #[ink(message)]
@@ -257,7 +281,7 @@ pub mod community {
         pub fn join_community(
             &mut self,
             user_data: String,
-            _nft_data: String,
+            nft_data: String,
         ) -> Result<(), CommunityActionError> {
             let sender = self.env().caller();
             let mut store = self.store.get().unwrap();
@@ -267,7 +291,7 @@ pub mod community {
             }
 
             let CommunityConfig {
-                treasury,
+                // treasury,
                 subscription_duration,
                 ..
             } = self.config.get().unwrap();
@@ -276,7 +300,7 @@ pub mod community {
             user.sub_deadline = (self.env().block_timestamp() as u128) + subscription_duration;
 
             // mint nft
-            self._mint_user_nft(sender);
+            self._mint_user_nft(sender, nft_data);
 
             // save the user
             store.users.push(user);
@@ -284,9 +308,9 @@ pub mod community {
             // update the store
             self.store.set(&store);
 
-            let _ = self
-                .env()
-                .transfer(treasury, self.env().transferred_value());
+            // let _ = self
+            //     .env()
+            //     .transfer(treasury, self.env().transferred_value());
 
             // Emit event
             self._emit_new_sign_up(sender, user_data.clone());
@@ -320,12 +344,12 @@ pub mod community {
                 )));
             }
 
-            let CommunityConfig { treasury, .. } = self.config.get().unwrap();
+            // let CommunityConfig { treasury, .. } = self.config.get().unwrap();
 
-            let nutritionist_application_fee = NUTRITIONIST_APPLICATION_FEE;
-            if self.env().transferred_value() < nutritionist_application_fee {
-                return Err(CommunityActionError::InsufficientPayment);
-            }
+            // let nutritionist_application_fee = NUTRITIONIST_APPLICATION_FEE;
+            // if self.env().transferred_value() < nutritionist_application_fee {
+            //     return Err(CommunityActionError::InsufficientPayment);
+            // }
 
             let application = NutritionistApplication {
                 data_uri: data_uri.clone(),
@@ -334,9 +358,9 @@ pub mod community {
             };
             store.nutritionist_applications.push(application);
 
-            let _ = self
-                .env()
-                .transfer(treasury, self.env().transferred_value());
+            // let _ = self
+            //     .env()
+            //     .transfer(treasury, self.env().transferred_value());
 
             // Emit event
             self._emit_new_application(sender, data_uri.clone());
@@ -377,17 +401,20 @@ pub mod community {
                 return Err(CommunityActionError::AlreadyANutritionist);
             }
 
-            if let Some(nutritionist) = store
-                .nutritionists
-                .iter_mut()
+            let data_uri = store
+                .nutritionist_applications
+                .iter()
                 .find(|n| n.address == applicant)
-            {
-                nutritionist.status = NutritionistApplicationStatus::Accepted;
-            }
+                .unwrap()
+                .data_uri
+                .clone();
+
+            let nutritionist = Nutritionist::new(applicant, data_uri.clone());
+            store.nutritionists.push(nutritionist);
+            self._mint_nutritionist_nft(applicant, data_uri.clone());
 
             self.store.set(&store);
 
-            self._mint_nutritionist_nft(applicant);
             self._emit_application_approved(applicant);
 
             Ok(())
