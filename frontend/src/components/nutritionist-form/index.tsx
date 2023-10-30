@@ -62,7 +62,7 @@ const NutritionistForm = () => {
         >
           ✕
         </label>
-        <h2 className='text-[45px] text-white'>Register as a Nutritionist</h2>
+        <h2 className='text-[45px]'>Register as a Nutritionist</h2>
         <form
           className='w-full flex flex-col gap-7'
           onSubmit={handleSubmit(onSubmit)}

@@ -26,7 +26,7 @@ export function CommunityContractProvider({ children }: PropsWithChildren) {
   const publishArticle = useTx(community, 'publishArticle');
   const createFitnessPlan = useTx(community, 'createFitnessPlan');
   const createConsultation = useTx(community, 'createConsultation');
-  const joinCommunity = useTx(community, 'joinCommunity');
+  const joinCommunity = useTx(community, 'join_community');
   const cancelNutritionistApplication = useTx(
     community,
     'cancelNutritionistApplication'

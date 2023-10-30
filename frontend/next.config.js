@@ -20,6 +20,10 @@ const nextConfig = {
     // See: https://github.com/polkadot-js/api/issues/5636
     '**@polkadot/**',
   ],
+  output: 'export',
+  images: {
+    unoptimized: true, // Add this line to disable image optimization
+  },
 };
 module.exports = {
   webpack(config) {
