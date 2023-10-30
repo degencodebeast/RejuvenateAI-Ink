@@ -26,13 +26,16 @@ const main = async () => {
   const accountUri = process.env.ACCOUNT_URI || '//Alice'
   const { api, chain, account } = await initPolkadotJs(chainId, accountUri)
 
-  // Deploy greeter contract
-  const { abi, wasm } = await getDeploymentData('greeter')
-  const greeter = await deployContract(api, account, abi, wasm, 'default', [])
+  const { abi: treasuryAbi, wasm: treasuryWasm } = await getDeploymentData('treasury')
+  const treasury = await deployContract(api, account, treasuryAbi, treasuryWasm, 'default', [])
+
+  // Deploy community contract
+  const { abi, wasm } = await getDeploymentData('community')
+  const community = await deployContract(api, account, abi, wasm, 'default', [treasury.address])
 
   // Write contract addresses to `{contract}/{network}.ts` file(s)
   await writeContractAddresses(chain.network, {
-    greeter,
+    community,
   })
 }
 
