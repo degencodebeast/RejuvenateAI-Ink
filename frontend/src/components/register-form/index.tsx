@@ -1,17 +1,18 @@
 'use client';
-import React, { useEffect } from 'react';
+import React, { useContext } from 'react';
 import { useRouter } from 'next/navigation';
 //import { useRouter } from 'next/router'
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as Yup from 'yup';
-//import { putJSONandGetHash } from '@/helpers/prompt';
+import { useCommunityContext } from '../../context/CommunityContract';
 import { putJSONandGetHash } from '@/helpers/prompt';
 import { toast } from 'react-toastify';
 
 const RegisterForm = () => {
   //const auth = useAuth()
   const router = useRouter();
+  const { joinCommunity } = useCommunityContext();
 
   // form validation rules
   const validationSchema = Yup.object().shape({
@@ -47,6 +48,8 @@ const RegisterForm = () => {
       };
       const nftURI = await putJSONandGetHash(nftObject);
       console.log(userDataCid, nftURI);
+      const communityArguments = [userDataCid, nftURI];
+      await joinCommunity?.signAndSend(communityArguments);
       toast.success('Sign up successful');
       router.push('/member/dashboard');
     } catch {
