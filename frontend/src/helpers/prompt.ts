@@ -1,5 +1,7 @@
 import { Petit_Formal_Script } from 'next/font/google';
 
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
 import { Web3Storage } from 'web3.storage';
 
 function getAccessToken() {
