@@ -48,7 +48,7 @@ const RegisterForm = () => {
       const nftURI = await putJSONandGetHash(nftObject);
       console.log(userDataCid, nftURI);
       toast.success('Sign up successful');
-      // router.push('/member/dashboard');
+      router.push('/member/dashboard');
     } catch {
       toast.error('Error signing up');
     }

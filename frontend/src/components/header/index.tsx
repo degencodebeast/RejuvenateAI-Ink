@@ -21,13 +21,10 @@ const Header = ({ bg = 'transparent' }: { bg?: string }) => {
   const { setAddress } = useAppContext();
   const { account, connect, disconnect } = useWallet();
   const wallets = useAllWallets();
-  //const { address } = useAccount()
-  const address = 'yes';
-  //const auth = useAuth();
 
   useEffect(() => {
     setAddress(account?.address || '');
-    account ?? toast.success('Wallet Connected Succesfully');
+    account && toast.success('Wallet Connected Succesfully');
   }, [account]);
 
   return (
