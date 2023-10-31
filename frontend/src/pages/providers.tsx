@@ -5,6 +5,7 @@ import React from 'react';
 import { UseInkProvider } from 'useink';
 
 import { AppWrapper } from '../context/state';
+import { CommunityContractProvider } from '../context/CommunityContract';
 import {
   RococoContractsTestnet,
   ShibuyaTestnet,
@@ -20,7 +21,9 @@ function Providers({ children }: { children: React.ReactNode }) {
       }}
     >
       <AppWrapper>
-        <ChakraProvider>{children}</ChakraProvider>
+        <CommunityContractProvider>
+          <ChakraProvider>{children}</ChakraProvider>
+        </CommunityContractProvider>
       </AppWrapper>
     </UseInkProvider>
   );
